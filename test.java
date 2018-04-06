@@ -4,6 +4,8 @@ import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -14,8 +16,9 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-import java.sql.SQLOutput;
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class test extends Application{
     private Pane root;
@@ -23,9 +26,13 @@ public class test extends Application{
     private double translateX, translateY;
     private double objectX, objectY;
     private double width, height;
+    private int numberOfTimers;
+    private int currentTimeSeconds;
     private boolean resizeA;
     private boolean resizeB;
     private ArrayList<Group> tasks = new ArrayList<>();
+    private ArrayList<Boolean> containsTimer = new ArrayList<>();
+    private ArrayList<Integer> startingTime = new ArrayList<>();
     private EventHandler<MouseEvent> onMousePressed = event -> {
         windowX = event.getSceneX();
         windowY = event.getSceneY();
@@ -45,7 +52,7 @@ public class test extends Application{
             resizeA = true;
             ((Rectangle)(event.getSource())).setCursor(Cursor.W_RESIZE);
         }
-        System.out.println(resizeA+", "+resizeB);
+        if(resizeB&&resizeA) ((Rectangle)(event.getSource())).setCursor(Cursor.NW_RESIZE);
     };
     private EventHandler<MouseEvent> onRelease = event -> {
         resizeA = false;
@@ -60,31 +67,40 @@ public class test extends Application{
             double newTranslateY = translateY + offsetY;
             ((Rectangle) (event.getSource())).setTranslateX(newTranslateX);
             ((Rectangle) (event.getSource())).setTranslateY(newTranslateY);
-        }else if(resizeA){
+        }else if(resizeA&&resizeB){
+            double offsetX = event.getSceneX() - windowX;
+            double offsetY = event.getSceneY() - windowY;
+            double newTranslateX = offsetX + width;
+            double newTranslateY = offsetY + height;
+            if(newTranslateX>=10&&newTranslateY>=10) {
+                ((Rectangle) (event.getSource())).setWidth(newTranslateX);
+                ((Rectangle) (event.getSource())).setHeight(newTranslateY);
+            }
+        }
+        else if(resizeA){
             double offsetX = event.getSceneX() - windowX;
             double newTranslateX = offsetX + width;
-            if(newTranslateX>=10)
-                ((Rectangle) (event.getSource())).setWidth(newTranslateX);
+            if(newTranslateX>=10) ((Rectangle) (event.getSource())).setWidth(newTranslateX);
         }else if(resizeB){
             double offsetY = event.getSceneY() - windowY;
             double newTranslateY = offsetY + height;
-            if(newTranslateY>=10)
-                ((Rectangle) (event.getSource())).setHeight(newTranslateY);
+            if(newTranslateY>=10) ((Rectangle) (event.getSource())).setHeight(newTranslateY);
         }
     };
     public test(){
         root = new Pane();
-
     }
     public static void main(String[] args) { launch(args); }
     public void start(Stage primaryStage) throws Exception {
+        Timer t = new Timer();
+        t.schedule(new TimerTask() {public void run() { currentTimeSeconds++; }},1000);
         drawToolBar();
-        drawWindow();
+        drawWindow(false);
         primaryStage.setScene(new Scene(root,800,600));
         primaryStage.show();
         primaryStage.setTitle("test");
     }
-    public void drawWindow(){
+    private void drawWindow(boolean Timer){
         Group g = new Group();
         Rectangle r = new Rectangle(50, 80, 50, 50);
         r.setFill(Color.WHITESMOKE);
@@ -94,6 +110,7 @@ public class test extends Application{
         r.setOnMousePressed(onMousePressed);
         r.setOnMouseDragged(onDragEvent);
         r.setOnMouseReleased(onRelease);
+        r.setId("Rectangle"+tasks.size());
         root.getChildren().addAll(r);
         Rectangle r2 = new Rectangle(50, 80, 50, 50);
         r2.setFill(Color.WHITESMOKE);
@@ -103,10 +120,14 @@ public class test extends Application{
         r2.setOnMousePressed(onMousePressed);
         r2.setOnMouseDragged(onDragEvent);
         r2.setOnMouseReleased(onRelease);
+        r2.setId("Rectangle"+tasks.size());
         g.getChildren().addAll(r2);
         tasks.add(g);
-        for(Group groups: tasks){
-            System.out.println(groups.getChildren().toString());
+        for(Group g2 : tasks){
+            System.out.println(g2.getChildren().toString());
+        }
+        if(Timer){
+            containsTimer.add(true);
         }
     }
     private void drawToolBar(){
@@ -131,11 +152,13 @@ public class test extends Application{
         addWindow.setLayoutY(10);
         addWindow.setStyle("-fx-focus-color: transparent;");
         addWindow.setStyle("-fx-faint-focus-color: transparent;");
-        addWindow.setOnAction(event -> {
-            drawWindow();
-        });
+        addWindow.setOnAction(event -> drawWindow(false));
 
-
+        CheckBox cb = new CheckBox();
+        Label l = new Label("Add Timer");
+        l.setLabelFor(cb);
+        cb.setLayoutX(150);
+        cb.setLayoutY(20);
         root.getChildren().addAll(toolBarRectangle, addWindow, t);
     }
 }

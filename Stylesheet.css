@@ -1,0 +1,10 @@
+.check-box > .box > .mark {
+    -fx-padding: 10px;
+}
+.check-box > .box {
+    -fx-padding: 5px;
+}
+.button{
+    -fx-faint-focus-color: transparent;
+    -fx-focus-color: transparent;
+}

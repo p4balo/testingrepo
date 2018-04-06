@@ -30,6 +30,7 @@ public class test extends Application{
     private int currentTimeSeconds;
     private boolean resizeA;
     private boolean resizeB;
+    private String css;
     private ArrayList<Group> tasks = new ArrayList<>();
     private ArrayList<Boolean> containsTimer = new ArrayList<>();
     private ArrayList<Integer> startingTime = new ArrayList<>();
@@ -88,6 +89,7 @@ public class test extends Application{
         }
     };
     public test(){
+        css = this.getClass().getResource("Stylesheet.css").toExternalForm();
         root = new Pane();
     }
     public static void main(String[] args) { launch(args); }
@@ -137,7 +139,7 @@ public class test extends Application{
         toolBarRectangle.setStrokeWidth(1);
 
         Text t = new Text("Task");
-        t.setFont(new Font("Courier New",30));
+        t.setFont(new Font(30));
         t.setLayoutX(10);
         t.setLayoutY(40);
 
@@ -150,16 +152,20 @@ public class test extends Application{
         addWindow.setGraphic(view);
         addWindow.setLayoutX(90);
         addWindow.setLayoutY(10);
-        addWindow.setStyle("-fx-focus-color: transparent;");
-        addWindow.setStyle("-fx-faint-focus-color: transparent;");
+        addWindow.getStylesheets().add(css);
         addWindow.setOnAction(event -> drawWindow(false));
 
         CheckBox cb = new CheckBox();
-        Label l = new Label("Add Timer");
+        Label l = new Label("Timer");
         l.setLabelFor(cb);
-        cb.setLayoutX(150);
-        cb.setLayoutY(20);
-        root.getChildren().addAll(toolBarRectangle, addWindow, t);
+        l.setLayoutY(10);
+        l.setLayoutX(170);
+        l.setFont(new Font(30));
+        cb.setLayoutX(255);
+        cb.setLayoutY(15);
+        cb.getStylesheets().add(css);
+
+        root.getChildren().addAll(toolBarRectangle, addWindow, t, cb, l);
     }
 }
 

@@ -8,3 +8,6 @@
     -fx-faint-focus-color: transparent;
     -fx-focus-color: transparent;
 }
+.TimerInput .scroll-bar:vertical:disabled {
+    -fx-opacity: 0;
+}

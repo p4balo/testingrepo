@@ -1,11 +1,11 @@
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -31,6 +31,8 @@ public class test extends Application{
     private boolean resizeA;
     private boolean resizeB;
     private String css;
+    private TextArea ta;
+    private ComboBox<String> comboBox;
     private ArrayList<Group> tasks = new ArrayList<>();
     private ArrayList<Boolean> containsTimer = new ArrayList<>();
     private ArrayList<Integer> startingTime = new ArrayList<>();
@@ -91,6 +93,8 @@ public class test extends Application{
     public test(){
         css = this.getClass().getResource("Stylesheet.css").toExternalForm();
         root = new Pane();
+        currentTimeSeconds = 0;
+        ta = new TextArea();
     }
     public static void main(String[] args) { launch(args); }
     public void start(Stage primaryStage) throws Exception {
@@ -130,6 +134,10 @@ public class test extends Application{
         }
         if(Timer){
             containsTimer.add(true);
+            startingTime.add(currentTimeSeconds);
+            System.out.println("nut");
+            int timefor = Integer.parseInt(ta.getText());
+            Text t = new Text();
         }
     }
     private void drawToolBar(){
@@ -143,6 +151,34 @@ public class test extends Application{
         t.setLayoutX(10);
         t.setLayoutY(40);
 
+        CheckBox cb = new CheckBox();
+        Label l = new Label("Timer");
+        l.setLabelFor(cb);
+        l.setLayoutY(10);
+        l.setLayoutX(170);
+        l.setFont(new Font(30));
+        cb.setLayoutX(260);
+        cb.setLayoutY(15);
+        cb.getStylesheets().add(css);
+
+        ta.setLayoutX(300);
+        ta.setLayoutY(10);
+        ta.setMaxSize(80,1);
+        ta.setFont(new Font(14));
+        ta.setId("TimerInput");
+        ta.setTextFormatter(new TextFormatter<String>(change -> change.getControlNewText().length() <= 6 ? change : null));
+
+        ObservableList<String> s = FXCollections.observableArrayList();
+        s.add("Seconds");
+        s.add("Minutes");
+        s.add("Hours");
+        s.add("Days");
+        comboBox = new ComboBox<>(s);
+        comboBox.setLayoutX(400);
+        comboBox.setLayoutY(10);
+        comboBox.setPlaceholder(null);
+
+
         Button addWindow = new Button();
         Image plus = new Image(getClass().getResourceAsStream("greenPlus.png"));
         ImageView view = new ImageView(plus);
@@ -153,19 +189,9 @@ public class test extends Application{
         addWindow.setLayoutX(90);
         addWindow.setLayoutY(10);
         addWindow.getStylesheets().add(css);
-        addWindow.setOnAction(event -> drawWindow(false));
+        addWindow.setOnAction(event -> drawWindow(cb.isSelected()));
 
-        CheckBox cb = new CheckBox();
-        Label l = new Label("Timer");
-        l.setLabelFor(cb);
-        l.setLayoutY(10);
-        l.setLayoutX(170);
-        l.setFont(new Font(30));
-        cb.setLayoutX(255);
-        cb.setLayoutY(15);
-        cb.getStylesheets().add(css);
-
-        root.getChildren().addAll(toolBarRectangle, addWindow, t, cb, l);
+        root.getChildren().addAll(toolBarRectangle, addWindow, t, cb, l, ta, comboBox);
     }
 }
 

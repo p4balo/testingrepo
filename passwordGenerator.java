@@ -1,8 +1,10 @@
+import com.sun.javafx.scene.EnteredExitedHandler;
 import javafx.application.Application;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -15,6 +17,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
+import jdk.nashorn.internal.ir.debug.JSONWriter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.w3c.dom.css.Rect;
@@ -31,13 +34,14 @@ public class passwordGenerator extends Application {
     private String[] specialCharsList;
     private String[] capitalCharsList;
     private String[] numberCharList;
+    private String masterKey;
     private boolean repeatingChars;
     private boolean containsSpecialChars;
     private boolean containsCapitalChars;
     private boolean containsNumberChars;
     private TableView<PasswordData> table = new TableView<>();
-    private final ObservableList<PasswordData> data =
-            FXCollections.observableArrayList();
+    private final ObservableList<PasswordData> data = FXCollections.observableArrayList();
+    private ComboBox<String> options;
 
     public passwordGenerator(){
         basicCharList = new String[]{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
@@ -47,10 +51,35 @@ public class passwordGenerator extends Application {
             capitalCharsList[i] = basicCharList[i].toUpperCase();
         }
         numberCharList = new String[]{"0","1","2","3","4","5","6","7","8","9"};
+
+        readJSON(data, "masterkey.json", 1);
     }
     public static void main(String[] args) { launch(args); }
     public void start(Stage primaryStage) {
-        Rectangle r1 = new Rectangle(20,20,760,560);
+
+        ToolBar tb1 = new ToolBar();
+        tb1.setOrientation(Orientation.HORIZONTAL);
+        tb1.setMinWidth(800);
+
+        options = new ComboBox<>();
+
+        ObservableList<String> list = FXCollections.observableArrayList(
+                "Options",
+                "Change Master Key"
+        );
+
+        options.setOnAction(event -> {
+            if(options.getValue().equals("Change Master Key")){ changePasswordPopup(primaryStage); }
+        });
+
+
+        options.setItems(list);
+        options.getSelectionModel().selectFirst();
+
+        tb1.getItems().addAll(options);
+        root.getChildren().addAll(tb1);
+
+        Rectangle r1 = new Rectangle(20,40,760,540);
         r1.setStrokeWidth(3);
         r1.setFill(Color.TRANSPARENT);
         r1.setStroke(Color.DIMGRAY);
@@ -300,7 +329,6 @@ public class passwordGenerator extends Application {
         root.getChildren().addAll(b1);
 
         table.setEditable(true);
-        //table.setMaxSize();
 
         TableColumn firstNameCol = new TableColumn("What For");
         firstNameCol.setMinWidth(125);
@@ -328,7 +356,7 @@ public class passwordGenerator extends Application {
         b3.setLayoutY(395);
         b3.setOnAction(event ->{
             data.addAll(new PasswordData(t1.getText(),ta1.getText()));
-            writeToJson();
+            writeToJson("data.json",0);
         });
         root.getChildren().addAll(b3);
 
@@ -336,13 +364,106 @@ public class passwordGenerator extends Application {
         b4.setLayoutX(45);
         b4.setLayoutY(445);
         b3.setId("TempButton");
-        b4.setOnAction(event -> signInPopup("1Apollorow", primaryStage));
+        b4.setOnAction(event -> signInPopup(masterKey, primaryStage));
         root.getChildren().add(b4);
 
         primaryStage.setTitle("Password Generator");
         primaryStage.setScene(new Scene(root,800,600));
         primaryStage.show();
     }
+    private void changePasswordPopup(Stage stage){
+        Popup p = new Popup();
+        p.setX(500);
+        p.setY(200);
+        Pane root = new Pane();
+        root.setPadding(new Insets(10,0,0,10));
+
+        Rectangle r1 = new Rectangle(300,200);
+        r1.setStroke(Color.DARKGRAY);
+        r1.setStrokeWidth(3);
+        r1.setFill(Color.WHITESMOKE);
+        root.getChildren().add(r1);
+
+        Text t1 = new Text("Enter in Password");
+        t1.setFont(new Font(20));
+        t1.setLayoutX(15);
+        t1.setLayoutY(25);
+        root.getChildren().add(t1);
+
+        Label l1 = new Label("Enter in New \nPassword");
+        l1.setLayoutX(15);
+        l1.setFont(new Font(12));
+
+        Label l2 = new Label("Enter in Old \nPassword");
+        l2.setLayoutX(15);
+        l2.setFont(new Font(12));
+
+        TextField tf1 = new TextField();
+        tf1.setLayoutX(100);
+        tf1.setLayoutY(45);
+        TextField tf2 = new TextField();
+        tf2.setLayoutX(100);
+        tf2.setLayoutY(45);
+        TextField tf3 = new TextField();
+        tf3.setLayoutX(100);
+        tf3.setLayoutY(95);
+
+        boolean previousPassword = checkPreviousPassword();
+
+        if(previousPassword){
+            root.getChildren().add(tf2);
+            root.getChildren().add(tf3);
+            l2.setLayoutY(45);
+            l1.setLayoutY(95);
+            root.getChildren().add(l1);
+            root.getChildren().add(l2);
+        }else{
+            root.getChildren().add(tf1);
+            l1.setLayoutY(45);
+            root.getChildren().add(l1);
+        }
+
+        Button submit = new Button("Enter");
+        submit.setLayoutX(15);
+        if(previousPassword) submit.setLayoutY(145);
+        else submit.setLayoutY(95);
+        submit.setOnAction(event ->{
+            if(previousPassword){
+                if(tf2.getText().equals(masterKey)) {
+                    masterKey = tf3.getText();
+                    writeToJson("masterkey.json",1);
+                    options.getSelectionModel().selectFirst();
+                    p.hide();
+                }
+            }else{
+                p.hide();
+                masterKey = tf1.getText();
+                writeToJson("masterkey.json",1);
+                options.getSelectionModel().selectFirst();
+            }
+        });
+        root.setOnKeyPressed(event -> {
+            if(event.getCode()==KeyCode.ENTER){
+                if(previousPassword){
+                    if(tf2.getText().equals(masterKey)) {
+                        masterKey = tf3.getText();
+                        writeToJson("masterkey.json",1);
+                        p.hide();
+                        options.getSelectionModel().selectFirst();
+                    }
+                }else{
+                    masterKey = tf1.getText();
+                    p.hide();
+                    writeToJson("masterkey.json",1);
+                    options.getSelectionModel().selectFirst();
+                }
+            }
+        });
+        root.getChildren().add(submit);
+        p.getContent().add(root);
+        p.show(stage);
+    }
+    private boolean checkPreviousPassword(){ return masterKey != null && !masterKey.equals(""); }
     private void signInPopup(String correctPassword, Stage stage){
         Popup p = new Popup();
         p.setX(500);
@@ -375,7 +496,7 @@ public class passwordGenerator extends Application {
         submit.setOnAction(event -> {
             System.out.println(event.getEventType());
             if(tf.getText().equals(correctPassword)){
-                readJSON(data);
+                readJSON(data, "data.json", 0);
                 p.hide();
             }else{
                 Text t1 = new Text("Incorrect Password");
@@ -396,7 +517,7 @@ public class passwordGenerator extends Application {
             if(event.getCode()== KeyCode.ENTER){
                 if(tf.getText().equals(correctPassword)){
                     p.hide();
-                    readJSON(data);
+                    readJSON(data, "data.json", 0);
                 }else{
                     Text t1 = new Text("Incorrect Password");
                     t1.setFont(new Font(12));
@@ -432,66 +553,88 @@ public class passwordGenerator extends Application {
         public String getPassword() { return password.get(); }
         public void setPassword(String fName) { password.set(fName); }
     }
-    private void writeToJson(){
+    private void writeToJson(String p, int type){
         JSONArray totaldata = new JSONArray();
-        for(int i = 0; i<data.size(); i++){
-            JSONArray array = new JSONArray();
+        if(type==0) {
+            for (int i = 0; i < data.size(); i++) {
+                JSONArray array = new JSONArray();
+                JSONObject obj = new JSONObject();
+                obj.put("For", data.get(i).getWhatFor());
+                array.put(obj);
+                JSONObject obj1 = new JSONObject();
+                obj.put("Password", data.get(i).getPassword());
+                array.put(obj1);
+                totaldata.put(array);
+            }
+        }else if(type==1){
             JSONObject obj = new JSONObject();
-            obj.put("For",data.get(i).getWhatFor());
-            array.put(obj);
-            JSONObject obj1 = new JSONObject();
-            obj.put("Password",data.get(i).getPassword());
-            array.put(obj1);
-            totaldata.put(array);
+            obj.put("MasterKey",masterKey);
+            totaldata.put(obj);
         }
         try {
-            String path = "data.json";
-            FileWriter file = new FileWriter(path);
+            FileWriter file = new FileWriter(p);
             String json = totaldata.toString();
             file.write(json);
             file.close();
-        }catch(IOException e){
-            e.printStackTrace();
-        }
+        }catch(IOException e){ e.printStackTrace(); }
     }
-    private void readJSON(ObservableList<PasswordData> e){
+    private void readJSON(ObservableList<PasswordData> e, String path, int type){
         String jsonText = "";
-        try{
-            String path = "data.json";
+        try {
             FileReader file = new FileReader(path);
             BufferedReader reader = new BufferedReader(file);
             jsonText = reader.readLine();
             file.close();
-        }catch(IOException pejo){ pejo.printStackTrace(); }
-        StringBuilder forWhat;
-        StringBuilder password;
-        ArrayList<String> collectionWhatFor = new ArrayList<>();
-        ArrayList<String> collectionPassword = new ArrayList<>();
-        if(jsonText!=null) {
-            for (int i = 0; i < jsonText.length(); i++) {
-                if (jsonText.charAt(i) == 'F') {
-                    forWhat = new StringBuilder();
-                    for (int f = i + 6; f < jsonText.length(); f++) {
-                        if (jsonText.charAt(f) == '\"') {
-                            break;
+        } catch (IOException pejo) {
+            pejo.printStackTrace();
+        }
+        if(type==0) {
+            StringBuilder forWhat;
+            StringBuilder password;
+            ArrayList<String> collectionWhatFor = new ArrayList<>();
+            ArrayList<String> collectionPassword = new ArrayList<>();
+            if (jsonText != null) {
+                for (int i = 0; i < jsonText.length(); i++) {
+                    if (jsonText.charAt(i) == 'F') {
+                        forWhat = new StringBuilder();
+                        for (int f = i + 6; f < jsonText.length(); f++) {
+                            if (jsonText.charAt(f) == '\"') {
+                                break;
+                            }
+                            forWhat.append(jsonText.charAt(f));
                         }
-                        forWhat.append(jsonText.charAt(f));
+                        collectionWhatFor.add(forWhat.toString());
                     }
-                    collectionWhatFor.add(forWhat.toString());
+                    if (jsonText.charAt(i) == 'P') {
+                        password = new StringBuilder();
+                        for (int f = i + 11; f < jsonText.length(); f++) {
+                            if (jsonText.charAt(f) == '\"') {
+                                break;
+                            }
+                            password.append(jsonText.charAt(f));
+                        }
+                        collectionPassword.add(password.toString());
+                    }
                 }
-                if (jsonText.charAt(i) == 'P') {
-                    password = new StringBuilder();
-                    for (int f = i + 11; f < jsonText.length(); f++) {
-                        if (jsonText.charAt(f) == '\"') {
-                            break;
-                        }
-                        password.append(jsonText.charAt(f));
-                    }
-                    collectionPassword.add(password.toString());
+                for (int i = 0; i < collectionPassword.size(); i++) {
+                    e.add(new PasswordData(collectionWhatFor.get(i), collectionPassword.get(i)));
                 }
             }
-            for (int i = 0; i < collectionPassword.size(); i++) {
-                e.add(new PasswordData(collectionWhatFor.get(i), collectionPassword.get(i)));
+        }else if(type==1){
+            StringBuilder password = new StringBuilder();
+            if(jsonText!=null){
+                for(int i = 0; i<jsonText.length(); i++){
+                    if(jsonText.charAt(i)=='y'){
+                        for(int k = i+4; k<jsonText.length(); k++){
+                            if(jsonText.charAt(k)=='\"'){
+                                break;
+                            }
+                            password.append(jsonText.charAt(k));
+
+                        }
+                    }
+                }
+                masterKey = password.toString();
             }
         }
     }

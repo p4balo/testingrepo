@@ -52,7 +52,7 @@ public class passwordGenerator extends Application{
         }
         numberCharList = new String[]{"0","1","2","3","4","5","6","7","8","9"};
 
-        readJSON(data, "masterkey.json", 1);
+        readJSON(data, "PasswordGen/masterkey.json", 1);
         System.out.println(masterKey);
     }
     public static void main(String[] args) { launch(args); }
@@ -332,7 +332,7 @@ public class passwordGenerator extends Application{
         b3.setOnAction(event ->{
             if(tf3.getText()==null||tf3.getText().equals("")) { data.addAll(new PasswordData(t1.getText(), ta1.getText())); }
             else{ data.addAll(new PasswordData(t1.getText(), ta1.getText(), tf3.getText())); }
-            writeToJson("data.json",0);
+            writeToJson("PasswordGen/data.json",0);
             deletePasswords(data);
         });
         root.getChildren().addAll(b3);
@@ -415,7 +415,7 @@ public class passwordGenerator extends Application{
         submit.setLayoutY(195);
         submit.setOnAction(event -> {
             data.add(new PasswordData(tf1.getText(),tf2.getText(),tf3.getText()));
-            writeToJson("data.json",0);
+            writeToJson("PasswordGen/data.json",0);
             p.hide();
             options.getSelectionModel().selectFirst();
         });
@@ -484,7 +484,7 @@ public class passwordGenerator extends Application{
             if(previousPassword){
                 if(tf2.getText().equals(masterKey)) {
                     masterKey = tf3.getText();
-                    writeToJson("masterkey.json",1);
+                    writeToJson("PasswordGen/masterkey.json",1);
                     options.getSelectionModel().selectFirst();
                     p.hide();
                 }else{
@@ -504,7 +504,7 @@ public class passwordGenerator extends Application{
             }else{
                 p.hide();
                 masterKey = tf1.getText();
-                writeToJson("masterkey.json",1);
+                writeToJson("PasswordGen/masterkey.json",1);
                 options.getSelectionModel().selectFirst();
             }
         });
@@ -513,7 +513,7 @@ public class passwordGenerator extends Application{
                 if(previousPassword){
                     if(tf2.getText().equals(masterKey)) {
                         masterKey = tf3.getText();
-                        writeToJson("masterkey.json",1);
+                        writeToJson("PasswordGen/masterkey.json",1);
                         p.hide();
                         options.getSelectionModel().selectFirst();
                     }else{
@@ -533,7 +533,7 @@ public class passwordGenerator extends Application{
                 }else{
                     masterKey = tf1.getText();
                     p.hide();
-                    writeToJson("masterkey.json",1);
+                    writeToJson("PasswordGen/masterkey.json",1);
                     options.getSelectionModel().selectFirst();
                 }
             }
@@ -559,14 +559,14 @@ public class passwordGenerator extends Application{
 
         if(masterKey!=null) {
             Text t = new Text("Enter in Master Key");
-            if(!checkData("data.json")){ t.setText("No Data Detected"); }
+            if(!checkData("PasswordGen/data.json")){ t.setText("No Data Detected"); }
             t.setLayoutY(25);
             t.setLayoutX(15);
             t.setFont(new Font(20));
             box.getChildren().add(t);
         }else{
             Text t = new Text("No Master Key Detected \nWould you Like to Load \nPrevious Data");
-            if(!checkData("data.json")){
+            if(!checkData("PasswordGen/data.json")){
                 t.setText("No Data Detected");
                 if(masterKey==null){ t.setText("No Data Detected \nand No Master Key Set"); }
             }
@@ -579,18 +579,18 @@ public class passwordGenerator extends Application{
             b1.setLayoutY(85);
             b1.setLayoutX(15);
             b1.setOnAction(event -> {
-                readJSON(data, "data.json", 0);
+                readJSON(data, "PasswordGen/data.json", 0);
                 p.hide();
                 deletePasswords(data);
             });
-            if(checkData("data.json")) {
+            if(checkData("PasswordGen/data.json")) {
                 box.getChildren().add(b1);
             }
 
             Button b2 = new Button("Close");
             b2.setLayoutX(85);
             b2.setLayoutY(85);
-            if(!checkData("data.json")){
+            if(!checkData("PasswordGen/data.json")){
                 b2.setLayoutX(15);
             }
             b2.setOnAction(event -> p.hide());
@@ -609,7 +609,7 @@ public class passwordGenerator extends Application{
         }
 
         if(masterKey!=null) {
-            if(checkData("data.json")) {
+            if(checkData("PasswordGen/data.json")) {
                 PasswordField tf = new PasswordField();
                 tf.setLayoutX(15);
                 tf.setLayoutY(45);
@@ -621,7 +621,7 @@ public class passwordGenerator extends Application{
                 submit.setLayoutX(15);
                 submit.setOnAction(event -> {
                     if (tf.getText().equals(correctPassword)) {
-                        readJSON(data, "data.json", 0);
+                        readJSON(data, "PasswordGen/data.json", 0);
                         p.hide();
                         deletePasswords(data);
                     } else {
@@ -643,7 +643,7 @@ public class passwordGenerator extends Application{
                     if (event.getCode() == KeyCode.ENTER) {
                         if (tf.getText().equals(correctPassword)) {
                             p.hide();
-                            readJSON(data, "data.json", 0);
+                            readJSON(data, "PasswordGen/data.json", 0);
                             deletePasswords(data);
                         } else {
                             Text t1 = new Text("Incorrect Password");
@@ -834,7 +834,7 @@ public class passwordGenerator extends Application{
                             }
                         };
                         data.remove(f);
-                        writeToJson("data.json",0);
+                        writeToJson("PasswordGen/data.json",0);
                         root.getChildren().remove(test);
                         deletePasswords(e);
                     }

@@ -1,13 +1,12 @@
+import com.sun.istack.internal.NotNull;
 import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
-import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -20,47 +19,46 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class test extends Application{
-    private Pane root;
+public class test extends Application {
+    private int currentTimeSeconds;
+    private int currentTimeMinutes;
+    private int currentTimeHours;
+    private int numberOfTimers;
     private double windowX, windowY;
     private double translateX, translateY;
     private double objectX, objectY;
     private double width, height;
-    private int numberOfTimers;
-    private int currentTimeSeconds;
-    private boolean resizeA;
-    private boolean resizeB;
-    private String css;
-    private TextArea ta;
-    private ComboBox<String> comboBox;
-    private ArrayList<Group> tasks = new ArrayList<>();
-    private ArrayList<Boolean> containsTimer = new ArrayList<>();
-    private ArrayList<Integer> startingTime = new ArrayList<>();
+    private boolean resizeA, resizeB;
+    private boolean currentTimer = false;
+    private boolean toFront = false;
+    private ArrayList<Integer> timeKeeper;
     private EventHandler<MouseEvent> onMousePressed = event -> {
         windowX = event.getSceneX();
         windowY = event.getSceneY();
-        translateX = ((Rectangle) (event.getSource())).getTranslateX();
-        translateY = ((Rectangle) (event.getSource())).getTranslateY();
-        width = ((Rectangle) (event.getSource())).getWidth();
-        height = ((Rectangle) (event.getSource())).getHeight();
+        translateX = ((Pane) (event.getSource())).getTranslateX();
+        translateY = ((Pane) (event.getSource())).getTranslateY();
+        width = ((Pane) (event.getSource())).getWidth();
+        height = ((Pane) (event.getSource())).getHeight();
         objectX = translateX+50;
         objectY = translateY+80;
-        System.out.println(event.getSceneX()+", "+event.getSceneY());
-        System.out.println((objectX+width)+", "+(objectY+height));
+
         if(event.getSceneY()>=objectY+height-3&&event.getSceneY()<=objectY+height&&event.getSceneX()>=objectX&&event.getSceneX()<=objectX+width){
             resizeB = true;
-            ((Rectangle)(event.getSource())).setCursor(Cursor.S_RESIZE);
+            System.out.println("test");
+            ((Pane)(event.getSource())).setCursor(Cursor.S_RESIZE);
         }
         if(event.getSceneY()>=objectY&&event.getSceneY()<=objectY+height&&event.getSceneX()>=objectX+width-3&&event.getSceneX()<=objectX+width){
+            System.out.println("test");
             resizeA = true;
-            ((Rectangle)(event.getSource())).setCursor(Cursor.W_RESIZE);
+            ((Pane)(event.getSource())).setCursor(Cursor.W_RESIZE);
         }
-        if(resizeB&&resizeA) ((Rectangle)(event.getSource())).setCursor(Cursor.NW_RESIZE);
+        if(resizeB&&resizeA){ ((Pane)(event.getSource())).setCursor(Cursor.NW_RESIZE); }
+
     };
     private EventHandler<MouseEvent> onRelease = event -> {
         resizeA = false;
         resizeB = false;
-        ((Rectangle)(event.getSource())).setCursor(Cursor.HAND);
+        ((Pane)(event.getSource())).setCursor(Cursor.HAND);
     };
     private EventHandler<MouseEvent> onDragEvent = event ->{
         if(!resizeA&&!resizeB) {
@@ -68,131 +66,351 @@ public class test extends Application{
             double offsetY = event.getSceneY() - windowY;
             double newTranslateX = translateX + offsetX;
             double newTranslateY = translateY + offsetY;
-            ((Rectangle) (event.getSource())).setTranslateX(newTranslateX);
-            ((Rectangle) (event.getSource())).setTranslateY(newTranslateY);
+            ((Pane) (event.getSource())).setTranslateX(newTranslateX);
+            ((Pane) (event.getSource())).setTranslateY(newTranslateY);
         }else if(resizeA&&resizeB){
             double offsetX = event.getSceneX() - windowX;
             double offsetY = event.getSceneY() - windowY;
             double newTranslateX = offsetX + width;
             double newTranslateY = offsetY + height;
             if(newTranslateX>=10&&newTranslateY>=10) {
-                ((Rectangle) (event.getSource())).setWidth(newTranslateX);
-                ((Rectangle) (event.getSource())).setHeight(newTranslateY);
+                Node n = ((Pane) (event.getSource())).getChildren().get(0);
+                Rectangle r = (Rectangle) n;
+                r.setHeight(newTranslateY);
+                r.setWidth(newTranslateX);
             }
         }
         else if(resizeA){
             double offsetX = event.getSceneX() - windowX;
             double newTranslateX = offsetX + width;
-            if(newTranslateX>=10) ((Rectangle) (event.getSource())).setWidth(newTranslateX);
+            if(newTranslateX>=10) {
+                Node n = ((Pane) (event.getSource())).getChildren().get(0);
+                Rectangle r = (Rectangle) n;
+                r.setWidth(newTranslateX);
+            }
         }else if(resizeB){
             double offsetY = event.getSceneY() - windowY;
             double newTranslateY = offsetY + height;
-            if(newTranslateY>=10) ((Rectangle) (event.getSource())).setHeight(newTranslateY);
+            if(newTranslateY>=10) {
+                Node n = ((Pane) (event.getSource())).getChildren().get(0);
+                Rectangle r = (Rectangle) n;
+                r.setHeight(newTranslateY);
+            }
         }
     };
+    private Pane root;
     public test(){
-        css = this.getClass().getResource("Stylesheet.css").toExternalForm();
+        timeKeeper = new ArrayList<>();
         root = new Pane();
-        currentTimeSeconds = 0;
-        ta = new TextArea();
     }
-    public static void main(String[] args) { launch(args); }
-    public void start(Stage primaryStage) throws Exception {
+    public static void main(String[] args) { launch(args);}
+    private void startTime(Stage s){
         Timer t = new Timer();
-        t.schedule(new TimerTask() {public void run() { currentTimeSeconds++; }},1000);
-        drawToolBar();
-        drawWindow(false);
-        primaryStage.setScene(new Scene(root,800,600));
-        primaryStage.show();
-        primaryStage.setTitle("test");
+        t.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if(!currentTimer)
+                    currentTimeSeconds++;
+                if(currentTimer){
+                    for(int i = 0; i<timeKeeper.size(); i++){
+                        if(timeKeeper.get(i)==currentTimeSeconds){
+                            for(int f = 0; f<root.getChildren().size(); f++){
+                                if(root.getChildren().get(f).toString().contains("Pane")){
+                                    Node n = root.getChildren().get(f);
+                                    Pane p = (Pane) n;
+                                    for(int j = 0; j<p.getChildren().size(); j++){
+                                        if(p.getChildren().get(j).toString().contains("Text[")){
+                                            Node n1 = p.getChildren().get(j);
+                                            if(n1.getId()!=null){
+                                                if(n1.getId().contains("Timer")){
+                                                    Text t = (Text) n1;
+                                                    t.setFont(new Font(t.getFont().getSize()-1.5));
+                                                    t.setText("Time Over");
+                                                    toFront = true;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            timeKeeper.remove(i);
+                            numberOfTimers--;
+                        }else {
+                            for (int f = 0; f < root.getChildren().size(); f++) {
+                                if (root.getChildren().get(f).toString().contains("Pane")) {
+                                    Node n = root.getChildren().get(f);
+                                    Pane p = (Pane) n;
+                                    for (int j = 0; j < p.getChildren().size(); j++) {
+                                        if (p.getChildren().get(j).toString().contains("Text[")) {
+                                            Node n1 = p.getChildren().get(j);
+                                            if (n1.getId() != null) {
+                                                if (n1.getId().contains("Timer")) {
+                                                    Text t = (Text) n1;
+                                                    t.setText(formatTime(timeKeeper.get(i)-currentTimeSeconds));
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if(timeKeeper.size()==0){
+                        currentTimer = false;
+                    }
+                    currentTimeSeconds++;
+                }
+                startTime(s);
+            }
+        },1000);
     }
-    private void drawWindow(boolean Timer){
-        Group g = new Group();
-        Rectangle r = new Rectangle(50, 80, 50, 50);
+    private String getTime(){
+        if(currentTimeSeconds>60){
+            currentTimeMinutes++;
+            currentTimeSeconds-=60;
+        }
+        if(currentTimeMinutes>60){
+            currentTimeHours++;
+            currentTimeMinutes-=60;
+        }
+        if(currentTimeSeconds<10){
+            if(currentTimeMinutes<10){
+                if(currentTimeHours<10){
+                    return "0"+currentTimeHours +":0"+ currentTimeMinutes +":0"+currentTimeSeconds+"";
+                }
+                return currentTimeHours +":0"+ currentTimeMinutes +":0"+currentTimeSeconds;
+            }
+            return currentTimeHours +":"+ currentTimeMinutes +":0"+currentTimeSeconds;
+        }else if(currentTimeMinutes<10){
+            if(currentTimeHours<10){
+                return "0"+currentTimeHours +":0"+ currentTimeMinutes +":"+currentTimeSeconds;
+            }
+            return currentTimeHours +":0"+ currentTimeMinutes +":"+currentTimeSeconds;
+        }else if(currentTimeHours<10){
+            return "0"+currentTimeHours +":"+ currentTimeMinutes +":"+currentTimeSeconds;
+        }
+        return currentTimeHours +":"+ currentTimeMinutes +":"+currentTimeSeconds;
+    }
+    private String formatTime(int seconds){
+        int minutes = 0;
+        int hours = 0;
+        if(seconds>60){
+            while(seconds>60){
+                minutes++;
+                seconds-=60;
+            }
+        }
+        if(minutes>60){
+            while(minutes>60){
+                hours++;
+                minutes-=60;
+            }
+        }
+        if(seconds<10){
+            if(minutes<10){
+                if(hours<10){
+                    return "0"+hours +":0"+ minutes +":0"+seconds+"";
+                }
+                return hours +":0"+ minutes +":0"+seconds;
+            }
+            return hours +":"+ minutes +":0"+seconds;
+        }else if(minutes<10){
+            if(hours<10){
+                return "0"+hours +":0"+ minutes +":"+seconds;
+            }
+            return hours +":0"+ minutes +":"+seconds;
+        }else if(hours<10){
+            return "0"+hours +":"+ minutes +":"+seconds;
+        }
+        return hours +":"+ minutes +":"+seconds;
+
+    }
+    private Pane createWindow(){
+        Rectangle r = new Rectangle(100, 100);
         r.setFill(Color.WHITESMOKE);
         r.setStroke(Color.DIMGRAY);
         r.setStrokeWidth(3);
         r.setCursor(Cursor.HAND);
-        r.setOnMousePressed(onMousePressed);
-        r.setOnMouseDragged(onDragEvent);
-        r.setOnMouseReleased(onRelease);
-        r.setId("Rectangle"+tasks.size());
-        root.getChildren().addAll(r);
-        Rectangle r2 = new Rectangle(50, 80, 50, 50);
-        r2.setFill(Color.WHITESMOKE);
-        r2.setStroke(Color.DIMGRAY);
-        r2.setStrokeWidth(3);
-        r2.setCursor(Cursor.HAND);
-        r2.setOnMousePressed(onMousePressed);
-        r2.setOnMouseDragged(onDragEvent);
-        r2.setOnMouseReleased(onRelease);
-        r2.setId("Rectangle"+tasks.size());
-        g.getChildren().addAll(r2);
-        tasks.add(g);
-        for(Group g2 : tasks){
-            System.out.println(g2.getChildren().toString());
-        }
-        if(Timer){
-            containsTimer.add(true);
-            startingTime.add(currentTimeSeconds);
-            System.out.println("nut");
-            int timefor = Integer.parseInt(ta.getText());
-            Text t = new Text();
-        }
+
+        Pane miniRoot = new Pane();
+        Text t = new Text();
+        t.setFont(new Font(17));
+        t.setLayoutY(t.getFont().getSize());
+        t.setLayoutX(5);
+
+        TextField tf = new TextField();
+        tf.setLayoutX(5);
+        tf.setLayoutY(t.getFont().getSize()+tf.getHeight()+5);
+        tf.setMaxWidth(90);
+
+        miniRoot.getChildren().addAll(r, t, tf);
+        miniRoot.setLayoutX(50);
+        miniRoot.setLayoutY(80);
+        miniRoot.setOnMousePressed(onMousePressed);
+        miniRoot.setOnMouseDragged(onDragEvent);
+        miniRoot.setOnMouseReleased(onRelease);
+        miniRoot.setId("ContainsTimer");
+        return miniRoot;
     }
-    private void drawToolBar(){
-        Rectangle toolBarRectangle = new Rectangle(-10,-10,900,70);
-        toolBarRectangle.setFill(Color.GHOSTWHITE);
-        toolBarRectangle.setStroke(Color.BLACK);
-        toolBarRectangle.setStrokeWidth(1);
+    private Pane createWindow(int time){
+        Rectangle r = new Rectangle(100, 100);
+        r.setFill(Color.WHITESMOKE);
+        r.setStroke(Color.DIMGRAY);
+        r.setStrokeWidth(3);
+        r.setCursor(Cursor.HAND);
 
-        Text t = new Text("Task");
-        t.setFont(new Font(30));
-        t.setLayoutX(10);
-        t.setLayoutY(40);
+        Pane miniRoot = new Pane();
+        Text t = new Text();
+        timeKeeper.add(time+currentTimeSeconds);
+        t.setText(formatTime(timeKeeper.get(timeKeeper.size()-1)-currentTimeSeconds));
+        currentTimer=true;
+        numberOfTimers++;
+        t.setFont(new Font(17));
+        t.setLayoutY(t.getFont().getSize());
+        t.setLayoutX(5);
+        t.setId("Timer"+numberOfTimers);
 
-        CheckBox cb = new CheckBox();
-        Label l = new Label("Timer");
-        l.setLabelFor(cb);
-        l.setLayoutY(10);
-        l.setLayoutX(170);
-        l.setFont(new Font(30));
-        cb.setLayoutX(260);
-        cb.setLayoutY(15);
-        cb.getStylesheets().add(css);
+        TextField tf = new TextField();
+        tf.setLayoutX(5);
+        tf.setLayoutY(t.getFont().getSize()+tf.getHeight()+5);
+        tf.setMaxWidth(90);
 
-        ta.setLayoutX(300);
-        ta.setLayoutY(10);
-        ta.setMaxSize(80,1);
-        ta.setFont(new Font(14));
-        ta.setId("TimerInput");
-        ta.setTextFormatter(new TextFormatter<String>(change -> change.getControlNewText().length() <= 6 ? change : null));
+        miniRoot.getChildren().addAll(r, t, tf);
+        miniRoot.setLayoutX(50);
+        miniRoot.setLayoutY(80);
+        miniRoot.setOnMousePressed(onMousePressed);
+        miniRoot.setOnMouseDragged(onDragEvent);
+        miniRoot.setOnMouseReleased(onRelease);
+        miniRoot.setId("ContainsTimer");
+        return miniRoot;
+    }
+    private Pane createWindow(String text){
+        Rectangle r = new Rectangle(100, 100);
+        r.setFill(Color.WHITESMOKE);
+        r.setStroke(Color.DIMGRAY);
+        r.setStrokeWidth(3);
+        r.setCursor(Cursor.HAND);
 
-        ObservableList<String> s = FXCollections.observableArrayList();
-        s.add("Seconds");
-        s.add("Minutes");
-        s.add("Hours");
-        s.add("Days");
-        comboBox = new ComboBox<>(s);
-        comboBox.setLayoutX(400);
-        comboBox.setLayoutY(10);
-        comboBox.setPlaceholder(null);
+        Pane miniRoot = new Pane();
 
+        Text t2 = new Text(text);
+        t2.setLayoutX(5);
+        t2.setLayoutY(t2.getFont().getSize()+5);
+        t2.setWrappingWidth(90);
 
-        Button addWindow = new Button();
-        Image plus = new Image(getClass().getResourceAsStream("greenPlus.png"));
-        ImageView view = new ImageView(plus);
-        view.setFitHeight(30);
-        view.setFitWidth(30);
+        miniRoot.getChildren().addAll(r, t2);
+        miniRoot.setLayoutX(50);
+        miniRoot.setLayoutY(80);
+        miniRoot.setOnMousePressed(onMousePressed);
+        miniRoot.setOnMouseDragged(onDragEvent);
+        miniRoot.setOnMouseReleased(onRelease);
+        miniRoot.setId("ContainsTimer");
+        return miniRoot;
+    }
+    private Pane createWindow(int time, String text){
+        Rectangle r = new Rectangle(100, 100);
+        r.setFill(Color.WHITESMOKE);
+        r.setStroke(Color.DIMGRAY);
+        r.setStrokeWidth(3);
+        r.setCursor(Cursor.HAND);
 
-        addWindow.setGraphic(view);
-        addWindow.setLayoutX(90);
-        addWindow.setLayoutY(10);
-        addWindow.getStylesheets().add(css);
-        addWindow.setOnAction(event -> drawWindow(cb.isSelected()));
+        Pane miniRoot = new Pane();
+        Text t = new Text();
+        System.out.println(time);
+        timeKeeper.add(time+currentTimeSeconds);
+        t.setText(formatTime(timeKeeper.get(timeKeeper.size()-1)-currentTimeSeconds));
+        currentTimer=true;
+        numberOfTimers++;
+        t.setFont(new Font(17));
+        t.setLayoutY(t.getFont().getSize());
+        t.setLayoutX(5);
+        t.setId("Timer"+numberOfTimers);
 
-        root.getChildren().addAll(toolBarRectangle, addWindow, t, cb, l, ta, comboBox);
+        Text t2 = new Text(text);
+        t2.setLayoutX(5);
+        t2.setLayoutY(t.getFont().getSize()+t2.getFont().getSize()+5);
+        t2.setWrappingWidth(90);
+
+        miniRoot.getChildren().addAll(r, t, t2);
+        miniRoot.setLayoutX(50);
+        miniRoot.setLayoutY(80);
+        miniRoot.setOnMousePressed(onMousePressed);
+        miniRoot.setOnMouseDragged(onDragEvent);
+        miniRoot.setOnMouseReleased(onRelease);
+        miniRoot.setId("ContainsTimer");
+        return miniRoot;
+    }
+    public void start(Stage primaryStage) throws Exception {
+        startTime(primaryStage);
+        TextField t = new TextField();
+        t.setLayoutX(65);
+        t.setLayoutY(5);
+        root.getChildren().add(t);
+        Label l1 = new Label("Time\n(in secs)");
+        l1.setLabelFor(t);
+        l1.setLayoutY(5);
+        l1.setLayoutX(5);
+        root.getChildren().add(l1);
+
+        TextField t2 = new TextField();
+        t2.setLayoutX(65);
+        t2.setLayoutY(45);
+        root.getChildren().add(t2);
+        Label l2 = new Label("Text");
+        l2.setLabelFor(t);
+        l2.setLayoutY(45);
+        l2.setLayoutX(5);
+        root.getChildren().add(l2);
+
+        Button b2 = new Button("New Field");
+        b2.setLayoutX(245);
+        b2.setLayoutY(5);
+        b2.setOnAction(event -> {
+            if((t.getText()==null||t.getText().equals(""))&&t2.getText()==null){
+                root.getChildren().addAll(createWindow());
+            }else if(t.getText()==null||t.getText().equals("")){
+                root.getChildren().addAll(createWindow(t2.getText()));
+            }
+            else if(t2.getText()!=null) {
+                root.getChildren().addAll(createWindow(Integer.parseInt(t.getText()), t2.getText()));
+            }
+            else {
+                root.getChildren().add(createWindow(Integer.parseInt(t.getText())));
+            }
+            t.setText("");
+            t2.setText("");
+        });
+        root.getChildren().add(b2);
+
+        Button b3 = new Button("350x300");
+        b3.setOnAction(event -> {
+            primaryStage.setMaxWidth(350);
+            primaryStage.setMaxHeight(300);
+            primaryStage.setMinWidth(350);
+            primaryStage.setMinHeight(300);
+        });
+        b3.setLayoutY(45);
+        b3.setLayoutX(245);
+        root.getChildren().add(b3);
+        Button b4 = new Button("900x700");
+        b4.setOnAction(event -> {
+            primaryStage.setMinWidth(900);
+            primaryStage.setMinHeight(700);
+            primaryStage.setMaxWidth(900);
+            primaryStage.setMaxHeight(700);
+        });
+        b4.setLayoutY(85);
+        b4.setLayoutX(245);
+        root.getChildren().add(b4);
+
+        primaryStage.setAlwaysOnTop(true);
+        primaryStage.setX(0);
+        primaryStage.setY(0);
+
+        primaryStage.setScene(new Scene(root, 900,700));
+        primaryStage.setTitle("test");
+        primaryStage.show();
     }
 }
-
-

@@ -4,6 +4,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -317,6 +318,7 @@ public class passwordGenerator extends Application{
         table.getColumns().addAll(whatFor, password, misc);
 
         final VBox vbox = new VBox();
+        vbox.setId("tablebox");
         vbox.setSpacing(5);
         vbox.setPadding(new Insets(10, 0, 0, 10));
         vbox.getChildren().addAll(table);
@@ -334,8 +336,6 @@ public class passwordGenerator extends Application{
             deletePasswords(data);
         });
         root.getChildren().addAll(b3);
-
-        deletePasswords(data);
 
         primaryStage.setTitle("Password Generator");
         primaryStage.setScene(new Scene(root,800,600));
@@ -620,7 +620,6 @@ public class passwordGenerator extends Application{
                 submit.setLayoutY(85);
                 submit.setLayoutX(15);
                 submit.setOnAction(event -> {
-                    System.out.println(event.getEventType());
                     if (tf.getText().equals(correctPassword)) {
                         readJSON(data, "data.json", 0);
                         p.hide();
@@ -820,7 +819,21 @@ public class passwordGenerator extends Application{
                 int f = i;
                 b.setOnAction(event -> {
                     if(b.getId().equals(""+f)){
-                        e.remove(f);
+                        for(int j = 0; j<root.getChildren().size(); j++) {
+                            if (root.getChildren().get(j).toString().contains("VBox")) {
+                                Node v = root.getChildren().get(j);
+                                if (v.getId() != null) {
+                                    if (!v.getId().equals("tablebox")) {
+                                        root.getChildren().remove(j);
+                                        j--;
+                                    }
+                                }else{
+                                    root.getChildren().remove(j);
+                                    j--;
+                                }
+                            }
+                        };
+                        data.remove(f);
                         writeToJson("data.json",0);
                         root.getChildren().remove(test);
                         deletePasswords(e);

@@ -54,9 +54,8 @@ public class PolyMaker extends Application {
         root.getChildren().add(typeOfShape);
 
         root.setOnKeyPressed(event -> {
-            if(event.getCode()==KeyCode.A){
+            if(event.getCode()==KeyCode.Q){
                 currentPosition++;
-                System.out.println(currentPosition);
             }
             if(currentPosition==1){
                 for(int i = 0; i<root.getChildren().size(); i++){
@@ -131,6 +130,20 @@ public class PolyMaker extends Application {
                     }
                 }
                 drawArrow(1);
+            }if(currentPosition==6){
+                for(int i = 0; i<root.getChildren().size(); i++){
+                    if(root.getChildren().get(i).getId()!=null){
+                        if (root.getChildren().get(i).getId().contains("editableText")) {
+                            Node n = root.getChildren().get(i);
+                            Text t = (Text) n;
+                            t.setText("Looks like you are all set, press ESC for help at anytime");
+                        }
+                        if(root.getChildren().get(i).getId().contains("line")){
+                            root.getChildren().remove(i);
+                            i--;
+                        }
+                    }
+                }
             }
         });
         root.setOnMousePressed(event -> {
@@ -315,7 +328,7 @@ public class PolyMaker extends Application {
         r1.setFill(Color.WHITESMOKE);
         root.getChildren().add(r1);
 
-        Text t1 = new Text("So this is the clout house \n Press A to continue");
+        Text t1 = new Text("So this is the clout house \n Press Q to continue");
         t1.setFont(new Font(24));
         t1.setLayoutX(100);
         t1.setLayoutY(41);
@@ -574,6 +587,29 @@ public class PolyMaker extends Application {
         rb10.setToggleGroup(tg3);
         root.getChildren().add(rb10);
 
+        Text t5 = new Text("Gender");
+        t5.setLayoutX(15);
+        t5.setLayoutY(260);
+        t5.setFont(new Font(18));
+        root.getChildren().add(t5);
+
+        ToggleGroup tg4 = new ToggleGroup();
+
+        RadioButton rb11 = new RadioButton("Boy");
+        rb11.setLayoutX(15);
+        rb11.setLayoutY(263);
+        rb11.setFont(new Font(15));
+        rb11.setToggleGroup(tg4);
+        root.getChildren().add(rb11);
+
+        RadioButton rb12 = new RadioButton("Girl");
+        rb12.setLayoutX(95);
+        rb12.setLayoutY(263);
+        rb12.setFont(new Font(15));
+        rb12.setToggleGroup(tg4);
+        root.getChildren().add(rb12);
+
+
         Rectangle r2 = new Rectangle(15,280,75,50);
         r2.setStroke(Color.BLACK);
         r2.setStrokeWidth(3);
@@ -589,9 +625,139 @@ public class PolyMaker extends Application {
         root.getChildren().add(iv);
 
         Button b1  = new Button("Set Character");
+        b1.setOnAction(event -> {
+            if(tg1.getSelectedToggle().toString().contains("White")){
+                CharacterInformation.setCharacterRace("white");
+            }else if(tg1.getSelectedToggle().toString().contains("Black")){
+                CharacterInformation.setCharacterRace("black");
+            }else if(tg1.getSelectedToggle().toString().contains("Asian")){
+                CharacterInformation.setCharacterRace("asian");
+            }else if(tg1.getSelectedToggle().toString().contains("Latino")){
+                CharacterInformation.setCharacterRace("latino");
+            }else{
+                CharacterInformation.setCharacterRace(null);
+            }
+
+
+            if(tg2.getSelectedToggle().toString().contains("Brunette")){
+                CharacterInformation.setCharacterHair("brunette");
+            }else if(tg2.getSelectedToggle().toString().contains("RedHead")){
+                CharacterInformation.setCharacterHair("red head");
+            }else if(tg2.getSelectedToggle().toString().contains("Blond")){
+                CharacterInformation.setCharacterHair("blond");
+            }else{
+                CharacterInformation.setCharacterHair(null);
+            }
+
+            if(tg3.getSelectedToggle().toString().contains("Smart")){
+                CharacterInformation.setCharacterStrength("smart");
+            }else if(tg3.getSelectedToggle().toString().contains("Thrifty")){
+                CharacterInformation.setCharacterStrength("thrifty");
+            }else if(tg3.getSelectedToggle().toString().contains("Strong")){
+                CharacterInformation.setCharacterStrength("strong");
+            }else{
+                CharacterInformation.setCharacterStrength(null);
+            }
+
+            if(tg4.getSelectedToggle().toString().contains("Boy")){
+                CharacterInformation.setCharacterGender("boy");
+            }else if(tg4.getSelectedToggle().toString().contains("Girl")){
+                CharacterInformation.setCharacterGender("girl");
+            }else{
+                CharacterInformation.setCharacterGender(null);
+            }
+
+            for(int i = 0; i<this.root.getChildren().size(); i++){
+                if(this.root.getChildren().get(i).getId()!=null) {
+                    if (this.root.getChildren().get(i).getId().contains("Popup")) {
+                        this.root.getChildren().remove(i);
+                        i--;
+                    }
+                }
+            }
+
+            drawCharacter(CharacterInformation.getCharacterRace(), CharacterInformation.getCharacterGender(), CharacterInformation.getCharacterHair());
+            currentPosition++;
+            System.out.println(CharacterInformation.getCharacterRace()+", "+CharacterInformation.getCharacterHair()+", "+CharacterInformation.getCharacterStrength()+", "+CharacterInformation.getCharacterGender());
+        });
+        b1.setLayoutY(400);
+        b1.setLayoutX(15);
+        root.getChildren().add(b1);
 
 
         p.getChildren().add(root);
         this.root.getChildren().add(p);
+    }
+    private void drawCharacter(String race, String gender, String hair){
+        Pane p = new Pane();
+        p.setId("Character");
+        p.setLayoutX(150);
+        p.setLayoutY(290);
+
+        if(race.contains("white")){
+            Circle c1 = new Circle(15);
+            c1.setFill(Color.FLORALWHITE);
+            c1.setStroke(Color.BLACK);
+            c1.setStrokeWidth(2);
+            p.getChildren().add(c1);
+
+            Line l1 = new Line(0,15,0,45);
+            l1.setStrokeWidth(2);
+            l1.setStroke(Color.BLACK);
+            p.getChildren().add(l1);
+
+            Line l2 = new Line(0,45,10,60);
+            l2.setStrokeWidth(2);
+            l2.setStroke(Color.BLACK);
+            p.getChildren().add(l2);
+
+            Line l3 = new Line(0,45,-10,60);
+            l3.setStrokeWidth(2);
+            l3.setStroke(Color.BLACK);
+            p.getChildren().add(l3);
+
+            Polygon py1 = new Polygon(
+                    136.0-150, 284.0-290,
+                    136.0-150, 268.0-290,
+                    145.0-150, 271.0-290,
+                    137.0-150, 285.0-290,
+                    139.0-150, 273.0-290,
+                    144.0-150, 273.0-290,
+                    150.0-150, 273.0-290,
+                    156.0-150, 273.0-290,
+                    162.0-150, 273.0-290,
+                    162.0-150, 282.0-290,
+                    156.0-150, 280.0-290,
+                    150.0-150, 278.0-290,
+                    142.0-150, 283.0-290
+            );
+            if(hair.contains("brunette")){
+                py1.setStroke(Color.ROSYBROWN);
+                py1.setFill(Color.ROSYBROWN);
+            }else if(hair.contains("blond")){
+                py1.setStroke(Color.GOLD);
+                py1.setFill(Color.GOLD);
+            }else{
+                py1.setStroke(Color.INDIANRED);
+                py1.setFill(Color.INDIANRED);
+            }
+            p.getChildren().add(py1);
+        }
+        root.getChildren().add(p);
+
+        root.setOnKeyPressed(event -> {
+            if(event.getCode()==KeyCode.D){
+                p.setLayoutX(p.getLayoutX()+3);
+            }
+            if(event.getCode()==KeyCode.D){
+                p.setLayoutX(p.getLayoutX()+3);
+            }
+            if(event.getCode()==KeyCode.D){
+                p.setLayoutX(p.getLayoutX()+3);
+            }
+            if(event.getCode()==KeyCode.D){
+                p.setLayoutX(p.getLayoutX()+3);
+            }
+        });
     }
 }

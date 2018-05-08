@@ -1,14 +1,11 @@
 import com.sun.istack.internal.NotNull;
 import javafx.application.Application;
-import javafx.event.Event;
-import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -19,7 +16,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import org.w3c.dom.css.Rect;
 
 import java.util.ArrayList;
 
@@ -109,11 +105,16 @@ public class PolyMaker extends Application {
                             Text t = (Text) n;
                             t.setText("Collect money to increase your inventory and your street creds");
                         }
+                        if(root.getChildren().get(i).getId().contains("line")){
+                            root.getChildren().remove(i);
+                            i--;
+                        }
                     }
                 }
-                drawMoney();
-                drawClout();
                 drawPFP();
+                drawMoney(10.99);
+                drawClout(10);
+                drawArrow(0);
             }
             if(currentPosition==5){
                 for(int i = 0; i<root.getChildren().size(); i++){
@@ -123,8 +124,13 @@ public class PolyMaker extends Application {
                             Text t = (Text) n;
                             t.setText("That reminds me, if forgot how you look lemme set you up");
                         }
+                        if(root.getChildren().get(i).getId().contains("line")){
+                            root.getChildren().remove(i);
+                            i--;
+                        }
                     }
                 }
+                drawArrow(1);
             }
         });
         root.setOnMousePressed(event -> {
@@ -371,16 +377,46 @@ public class PolyMaker extends Application {
         py1.setStrokeWidth(3);
         root.getChildren().add(py1);
     }
-    private void drawMoney(){
-
+    private void drawMoney(double moneyCount){
+        for(int i = 0; i<root.getChildren().size(); i++){
+            if(root.getChildren().get(i).getId()!=null) {
+                if (root.getChildren().get(i).getId().equals("Money")) {
+                    root.getChildren().remove(i);
+                }
+            }
+        }
+        Text t = new Text("$"+(int)moneyCount);
+        t.setFont(new Font(12));
+        t.setLayoutY(145);
+        t.setLayoutX(753);
+        t.setStroke(Color.GOLDENROD);
+        t.setId("Money");
+        root.getChildren().add(t);
     }
-    private void drawClout(){
+    private void drawClout(int cloutCount){
+        for(int i = 0; i<root.getChildren().size(); i++){
+            if(root.getChildren().get(i).getId()!=null) {
+                if (root.getChildren().get(i).getId().equals("Clout")) {
+                    root.getChildren().remove(i);
+                }
+            }
+        }
+        Text t = new Text(cloutCount+"C");
+        t.setFont(new Font(20));
+        t.setLayoutY(105);
+        t.setLayoutX(753);
+        t.setStroke(Color.GOLDENROD);
+        t.setId("Clout");
+        root.getChildren().add(t);
     }
     private void drawPFP(){
         Rectangle r1 = new Rectangle(725,0,75,75);
         r1.setStroke(Color.BLACK);
         r1.setStrokeWidth(3);
         r1.setFill(Color.TRANSPARENT);
+        r1.setOnMousePressed(event -> {
+            drawPFPselector();
+        });
         root.getChildren().add(r1);
         Rectangle r2 = new Rectangle(750, 75, 50,150);
         r2.setStroke(Color.BLACK);
@@ -389,9 +425,173 @@ public class PolyMaker extends Application {
         root.getChildren().add(r2);
     }
     private void drawArrow(int arrowNum){
-        Line l1 = new Line(625, 35,700,35);
-        l1.setStroke(Color.RED);
-        l1.setStrokeWidth(3.5);
-        l1.setId("line");
+        if(arrowNum==0){
+            Line l1 = new Line(675,105,735,105);
+            l1.setStroke(Color.RED);
+            l1.setStrokeWidth(3.5);
+            l1.setId("line");
+            root.getChildren().add(l1);
+            Line l2 = new Line(735,105,715,90);
+            l2.setStroke(Color.RED);
+            l2.setStrokeWidth(3.5);
+            l2.setId("line");
+            root.getChildren().add(l2);
+            Line l3 = new Line(735,105,715,120);
+            l3.setStroke(Color.RED);
+            l3.setStrokeWidth(3.5);
+            l3.setId("line");
+            root.getChildren().add(l3);
+        } else if(arrowNum==1) {
+            Line l1 = new Line(625, 35, 700, 35);
+            l1.setStroke(Color.RED);
+            l1.setStrokeWidth(3.5);
+            l1.setId("line");
+            root.getChildren().add(l1);
+            Line l2 = new Line(700, 35, 685, 15);
+            l2.setStroke(Color.RED);
+            l2.setStrokeWidth(3.5);
+            l2.setId("line");
+            root.getChildren().add(l2);
+            Line l3 = new Line(700, 35, 685, 55);
+            l3.setStroke(Color.RED);
+            l3.setStrokeWidth(3.5);
+            l3.setId("line");
+            root.getChildren().add(l3);
+        }
+    }
+    private void drawPFPselector(){
+        Pane p = new Pane();
+        p.setId("Popup");
+        p.setLayoutX(225);
+        p.setLayoutY(15);
+        Pane root = new Pane();
+        root.setPadding(new Insets(10,0,0,10));
+
+        Rectangle r1 = new Rectangle(300,550);
+        r1.setFill(Color.WHITE);
+        r1.setStrokeWidth(3);
+        r1.setStroke(Color.BLACK);
+        root.getChildren().add(r1);
+
+        Text t1 = new Text("Profile Selector");
+        t1.setStroke(Color.BLACK);
+        t1.setLayoutX(15);
+        t1.setFont(new Font(24));
+        t1.setLayoutY(39);
+        root.getChildren().add(t1);
+
+        Text t3 = new Text("Race");
+        t3.setFont(new Font(18));
+        t3.setLayoutY(68);
+        t3.setLayoutX(15);
+        root.getChildren().add(t3);
+
+        ToggleGroup tg1 = new ToggleGroup();
+
+        RadioButton rb1 = new RadioButton("White");
+        rb1.setLayoutX(15);
+        rb1.setLayoutY(70);
+        rb1.setFont(new Font(15));
+        rb1.setToggleGroup(tg1);
+        root.getChildren().add(rb1);
+
+        RadioButton rb2 = new RadioButton("Black");
+        rb2.setLayoutX(95);
+        rb2.setLayoutY(70);
+        rb2.setFont(new Font(15));
+        rb2.setToggleGroup(tg1);
+        root.getChildren().add(rb2);
+
+        RadioButton rb3 = new RadioButton("Asian");
+        rb3.setLayoutX(15);
+        rb3.setLayoutY(100);
+        rb3.setFont(new Font(15));
+        rb3.setToggleGroup(tg1);
+        root.getChildren().add(rb3);
+
+        RadioButton rb4 = new RadioButton("Latino");
+        rb4.setLayoutX(95);
+        rb4.setLayoutY(100);
+        rb4.setFont(new Font(15));
+        rb4.setToggleGroup(tg1);
+        root.getChildren().add(rb4);
+
+        Text t2 = new Text("Hair Color");
+        t2.setLayoutX(15);
+        t2.setLayoutY(148);
+        t2.setFont(new Font(18));
+        root.getChildren().add(t2);
+
+        ToggleGroup tg2 = new ToggleGroup();
+
+        RadioButton rb5 = new RadioButton("Blond");
+        rb5.setLayoutX(15);
+        rb5.setLayoutY(150);
+        rb5.setFont(new Font(15));
+        rb5.setToggleGroup(tg2);
+        root.getChildren().add(rb5);
+
+        RadioButton rb6 = new RadioButton("RedHead");
+        rb6.setLayoutX(95);
+        rb6.setLayoutY(150);
+        rb6.setFont(new Font(15));
+        rb6.setToggleGroup(tg2);
+        root.getChildren().add(rb6);
+
+        RadioButton rb7 = new RadioButton("Brunette");
+        rb7.setLayoutX(95);
+        rb7.setLayoutY(180);
+        rb7.setFont(new Font(15));
+        rb7.setToggleGroup(tg2);
+        root.getChildren().add(rb7);
+
+        Text t4 = new Text("Character Strength");
+        t4.setLayoutX(15);
+        t4.setLayoutY(215);
+        t4.setFont(new Font(18));
+        root.getChildren().add(t4);
+
+        ToggleGroup tg3 = new ToggleGroup();
+
+        RadioButton rb8 = new RadioButton("Smart");
+        rb8.setLayoutX(15);
+        rb8.setLayoutY(217);
+        rb8.setFont(new Font(15));
+        rb8.setToggleGroup(tg3);
+        root.getChildren().add(rb8);
+
+        RadioButton rb9 = new RadioButton("Thrifty");
+        rb9.setLayoutX(95);
+        rb9.setLayoutY(217);
+        rb9.setFont(new Font(15));
+        rb9.setToggleGroup(tg3);
+        root.getChildren().add(rb9);
+
+        RadioButton rb10 = new RadioButton("Strong");
+        rb10.setLayoutX(95);
+        rb10.setLayoutY(245);
+        rb10.setFont(new Font(15));
+        rb10.setToggleGroup(tg3);
+        root.getChildren().add(rb10);
+
+        Rectangle r2 = new Rectangle(15,280,75,50);
+        r2.setStroke(Color.BLACK);
+        r2.setStrokeWidth(3);
+        r2.setFill(Color.TRANSPARENT);
+        root.getChildren().add(r2);
+
+        //get Photoshop and make some images
+        ImageView iv = new ImageView();
+        iv.setFitHeight(10);
+        iv.setFitWidth(10);
+//        iv.setLayoutX();
+//        iv.setLayoutY();
+        root.getChildren().add(iv);
+
+        Button b1  = new Button("Set Character");
+
+
+        p.getChildren().add(root);
+        this.root.getChildren().add(p);
     }
 }

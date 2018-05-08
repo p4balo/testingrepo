@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/formBot/formBot.iml" filepath="$PROJECT_DIR$/formBot/formBot.iml" />
+      <module fileurl="file://$PROJECT_DIR$/PasswordGen/PasswordGen.iml" filepath="$PROJECT_DIR$/PasswordGen/PasswordGen.iml" />
+      <module fileurl="file://$PROJECT_DIR$/gucci game/gucci game.iml" filepath="$PROJECT_DIR$/gucci game/gucci game.iml" />
+      <module fileurl="file://$PROJECT_DIR$/testingrepository.iml" filepath="$PROJECT_DIR$/testingrepository.iml" />
     </modules>
   </component>
 </project>

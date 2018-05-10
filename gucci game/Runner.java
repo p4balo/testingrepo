@@ -12,7 +12,7 @@ public class Runner extends Application {
     }
     public void start(Stage primaryStage) throws Exception {
 
-        
+
         primaryStage.setScene(new Scene(p,800,600));
         primaryStage.show();
         primaryStage.setTitle("Gucci Game");

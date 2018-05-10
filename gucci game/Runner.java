@@ -1,6 +1,7 @@
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -8,9 +9,10 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class Runner extends Application {
+    private ArrayList<String> idList = new ArrayList<>();
     private Pane root;
     private int cloutCount;
     public Runner(){ root = new Pane();}
@@ -51,13 +53,18 @@ public class Runner extends Application {
         });
         miniPane.getChildren().add(b1);
 
+        //cssify button
         Button b2 = new Button();
         b2.setLayoutX(0);
-        b2.setLayoutY(575);
-        //Cog
-        //b2.setGraphic();
+        b2.setLayoutY(550);
+        ImageView iv1 = new ImageView("cog.png");
+        iv1.setFitWidth(60);
+        iv1.setFitHeight(50);
+        b2.setGraphic(iv1);
         miniPane.getChildren().add(b2);
-
+        idList.add("Option Button");
+        b2.setId(idList.get(idList.size()-1));
+        b2.getStylesheets().add("Stylesheet.css");
         return miniPane;
     }
     private void initGame(){

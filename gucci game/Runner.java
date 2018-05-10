@@ -39,12 +39,14 @@ public class Runner extends Application {
         Text t1 = new Text("Gucci Game");
         t1.setLayoutY(50);
         t1.setLayoutX(225+75);
-        t1.setFont(new Font("Comic Sans MS",32));
+        t1.setFont(new Font(32));
         t1.setStroke(Color.WHITE);
         t1.setFill(Color.WHITE);
         miniPane.getChildren().add(t1);
 
+
         Button b1 = new Button("Start Quest");
+        b1.setFont(new Font("Comic Sans MS",16));
         b1.setLayoutX(300);
         b1.setLayoutY(200);
         b1.setOnAction(event -> {
@@ -65,9 +67,13 @@ public class Runner extends Application {
         idList.add("Option Button");
         b2.setId(idList.get(idList.size()-1));
         b2.getStylesheets().add("Stylesheet.css");
+
         return miniPane;
     }
     private void initGame(){
 
+    }
+    private Font getFont(double size){
+        return Font.loadFont("file:Tahoma.ttf",size);
     }
 }

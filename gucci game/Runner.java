@@ -1,6 +1,7 @@
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -30,6 +31,20 @@ public class Runner extends Application {
     private Pane titleScreen(){
         Pane miniPane = new Pane();
 
+        ImageView iv1 = new ImageView("resources/Objects/belt.png");
+        iv1.setLayoutY(175);
+        iv1.setLayoutX(50);
+        iv1.setFitHeight(200);
+        iv1.setFitWidth(250);
+        root.getChildren().add(iv1);
+
+        ImageView iv2 = new ImageView("resources/Objects/backpack.png");
+        iv2.setLayoutY(150);
+        iv2.setLayoutX(500);
+        iv2.setFitHeight(200);
+        iv2.setFitWidth(200);
+        root.getChildren().add(iv2);
+
         Rectangle r1 = new Rectangle(180+75,15,250,50);
         r1.setFill(Color.RED);
         r1.setStroke(Color.RED);
@@ -38,7 +53,7 @@ public class Runner extends Application {
 
         Text t1 = new Text("Gucci Game");
         t1.setLayoutY(50);
-        t1.setLayoutX(225+75);
+        t1.setLayoutX(225+60);
         t1.setFont(new Font(32));
         t1.setStroke(Color.WHITE);
         t1.setFill(Color.WHITE);
@@ -59,10 +74,10 @@ public class Runner extends Application {
         Button b2 = new Button();
         b2.setLayoutX(0);
         b2.setLayoutY(550);
-        ImageView iv1 = new ImageView("cog.png");
-        iv1.setFitWidth(60);
-        iv1.setFitHeight(50);
-        b2.setGraphic(iv1);
+        ImageView resource1 = new ImageView("resources/Objects/cog.png");
+        resource1.setFitWidth(60);
+        resource1.setFitHeight(50);
+        b2.setGraphic(resource1);
         miniPane.getChildren().add(b2);
         idList.add("Option Button");
         b2.setId(idList.get(idList.size()-1));
@@ -72,8 +87,5 @@ public class Runner extends Application {
     }
     private void initGame(){
 
-    }
-    private Font getFont(double size){
-        return Font.loadFont("file:Tahoma.ttf",size);
     }
 }

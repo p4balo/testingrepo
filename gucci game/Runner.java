@@ -1,6 +1,8 @@
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -13,6 +15,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 
 import java.util.*;
@@ -21,19 +24,63 @@ public class Runner extends Application {
     private ArrayList<String> idList = new ArrayList<>();
     private HashMap<KeyCode, Boolean> pressedKeys = new HashMap<>();
     private ArrayList<KeyCode> presetKeys = new ArrayList<>();
+    private ArrayList<String> inventory = new ArrayList<>();
     private Pane root;
-    private Pane player;
+    private ImageView player;
+    private ImageView npc1;
+    private ImageView npc2;
+    private ImageView object1;
+    private ImageView object2;
     private int cloutCount;
+    private int currentDialog;
+    private int dialogCounter = 0;
     private boolean keyHeld;
     private boolean gameStart = false;
     private boolean idle = false;
+    private boolean activeDialog;
     private ArrayList<ImageView> idlePose;
 
     public Runner() {
+        currentDialog = 0;
+
+        npc1 = new ImageView("resources/Knight/idle/0000.png");
+        npc1.setLayoutX(500);
+        npc1.setLayoutY(100);
+        npc1.setFitWidth(125);
+        npc1.setFitHeight(200);
+        npc1.setId("objK");
+
+        npc2 = new ImageView("resources/Ninja/Idle/0000.png");
+        npc2.setLayoutX(450);
+        npc2.setLayoutY(300);
+        npc2.setFitWidth(125);
+        npc2.setFitHeight(200);
+        npc2.setId("objN");
+
+        object1 = new ImageView("resources/Objects/belt.png");
+        object1.setFitWidth(175);
+        object1.setFitHeight(70);
+        object1.setLayoutX(100);
+        object1.setLayoutY(400);
+        object1.setId("objBT");
+
+        object2 = new ImageView("resources/Objects/backpack.png");
+        object2.setLayoutX(300);
+        object2.setLayoutY(200);
+        object2.setFitWidth(150);
+        object2.setFitHeight(150);
+        object2.setId("objBP");
+
         root = new Pane();
+
         presetKeys.add(KeyCode.W);
+        presetKeys.add(KeyCode.A);
+        presetKeys.add(KeyCode.S);
+        presetKeys.add(KeyCode.D);
         pressedKeys.put(KeyCode.W, false);
-        System.out.println(pressedKeys.get(KeyCode.W));
+        pressedKeys.put(KeyCode.A, false);
+        pressedKeys.put(KeyCode.S, false);
+        pressedKeys.put(KeyCode.D, false);
 
         idlePose = new ArrayList<>();
         for (int i = 0; i < 8; i++) {
@@ -47,16 +94,53 @@ public class Runner extends Application {
         launch(args);
     }
     private void timer(){
-        Timer t = new Timer();
-        t.schedule(new TimerTask() {
-            public void run() {
-                //if()
-                timer();
+        new AnimationTimer(){
+            @Override
+            public void handle(long now) {
+                for(int i = 0; i<presetKeys.size(); i++){
+                    if(pressedKeys.get(presetKeys.get(i))){
+                        if(presetKeys.get(i)==KeyCode.W){
+                            moveUp();
+                        }
+                        if(presetKeys.get(i)==KeyCode.A){
+                            moveLeft();
+                        }
+                        if(presetKeys.get(i)==KeyCode.S){
+                            moveDown();
+                        }
+                        if(presetKeys.get(i)==KeyCode.D){
+                            moveRight();
+                        }
+                    }
+                }
+                if(activeDialog){
+                    dialogCounter++;
+                    if(dialogCounter==270){
+                        for(int i = 0; i<root.getChildren().size(); i++){
+                            if(root.getChildren().get(i).getId()!=null){
+                                if(root.getChildren().get(i).getId().contains("dialog")){
+                                    root.getChildren().remove(i);
+                                    i--;
+                                }
+                            }
+                        }
+                        dialogCounter = 0;
+                        activeDialog = false;
+                    }
+                }
             }
-        },1);
+        }.start();
     }
     public void start(Stage primaryStage) throws Exception {
         root.getChildren().add(titleScreen());
+        player = new ImageView("resources/Main_Character/idle/0000.png");
+        player.setLayoutY(100);
+        player.setLayoutX(100);
+        player.setFitHeight(200);
+        player.setFitWidth(125);
+        player.setTranslateZ(player.getBoundsInLocal().getWidth()/2);
+        player.setRotationAxis(Rotate.Y_AXIS);
+        player.setRotate(180);
         timer();
 
         primaryStage.setScene(new Scene(root, 800, 600));
@@ -167,7 +251,6 @@ public class Runner extends Application {
                 }
                 drawOptionsMenu();
             }
-            System.out.println(event.getCode());
         });
 
         return miniPane;
@@ -175,22 +258,29 @@ public class Runner extends Application {
     private void initGame() {
         root.getChildren().clear();
         root.requestFocus();
+        root.getChildren().add(player);
+        root.getChildren().add(npc1);
+        root.getChildren().add(npc2);
+        root.getChildren().add(object1);
+        root.getChildren().add(object2);
         root.setOnKeyPressed(event -> {
             for(int i = 0; i<presetKeys.size(); i++){
                 if(presetKeys.get(i)==event.getCode()){
-                    keyHeld = true;
+                    pressedKeys.replace(presetKeys.get(i), true);
                 }
+            }
+            if(event.getCode()==KeyCode.E){
+                checkBounds(player.getLayoutX(),player.getLayoutY());
             }
         });
         root.setOnKeyReleased(event -> {
             Set<KeyCode> keys = pressedKeys.keySet();
             for(int k = 0; k<pressedKeys.size(); k++) {
-                System.out.println(pressedKeys.values());
                 if(pressedKeys.values().contains(true)) {
                     for (int i = 0; i < presetKeys.size(); i++) {
                         for (int f = 0; f < keys.size(); f++) {
-                            if (keys.contains(presetKeys.get(i))) {
-                                pressedKeys.replace(presetKeys.get(i), false);
+                            if (keys.contains(event.getCode())) {
+                                pressedKeys.replace(event.getCode(), false);
                             }
                         }
                     }
@@ -198,6 +288,69 @@ public class Runner extends Application {
             }
         });
 
+    }
+    private void checkBounds(double x1, double y1){
+        int x = (int)x1;
+        int y = (int)y1;
+        for(int i = 0; i<root.getChildren().size(); i++){
+            if(root.getChildren().get(i).getId()!=null){
+                if(root.getChildren().get(i).getId().contains("obj")){
+
+                }
+            }
+        }
+        initDialog(null);
+    }
+    private void initDialog(String player){
+        activeDialog = true;
+        Rectangle r = new Rectangle(0,500,800,100);
+        r.setFill(Color.WHITE);
+        r.setStroke(Color.BLACK);
+        r.setStrokeWidth(3);
+        r.setId("dialog");
+        root.getChildren().add(r);
+        if(currentDialog==0){
+            Text t = new Text("Ninja:\nHey could you get me my gucci belt");
+            t.setLayoutX(15);
+            t.setLayoutY(530);
+            t.setFont(new Font(28));
+            t.setWrappingWidth(760);
+            t.setId("dialog");
+            root.getChildren().add(t);
+            currentDialog++;
+        }else if(currentDialog==1){
+            Text t = new Text("Player:\nAyy we copped that new grucci");
+            t.setLayoutX(15);
+            t.setLayoutY(530);
+            t.setFont(new Font(28));
+            t.setWrappingWidth(760);
+            t.setId("dialog");
+            root.getChildren().add(t);
+            currentDialog++;
+        }else if(currentDialog==2){
+            Text t = new Text("Pirate:\nThanks Mane");
+            t.setLayoutX(15);
+            t.setLayoutY(530);
+            t.setFont(new Font(28));
+            t.setWrappingWidth(760);
+            t.setId("dialog");
+            root.getChildren().add(t);
+            currentDialog++;
+        }
+    }
+    private void moveUp(){
+        player.setLayoutY(player.getLayoutY()-.7);
+    }
+    private void moveLeft(){
+        player.setLayoutX(player.getLayoutX()-.7);
+        player.setRotate(0);
+    }
+    private void moveDown(){
+        player.setLayoutY(player.getLayoutY()+.7);
+    }
+    private void moveRight(){
+        player.setLayoutX(player.getLayoutX()+.7);
+        player.setRotate(180);
     }
     private void drawOptionsMenu() {
         Pane miniPane = new Pane();
@@ -258,37 +411,5 @@ public class Runner extends Application {
         });
 
         root.getChildren().add(miniPane);
-    }
-
-    private void drawIdle(int ammountOfTime, int currentPicture, double x, double y) {
-//        Pane playerContainer = new Pane();
-//        playerContainer.setLayoutY(y);
-//        playerContainer.setLayoutX(x);
-//
-//        try {
-//            Thread.sleep(100);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//
-//        int index = -1;
-//        for(int i = 0;i<root.getChildren().size(); i++){
-//            if(root.getChildren().get(i)==playerContainer){
-//                index = i;
-//            }
-//        }
-//        if(index>0){
-//            root.getChildren().remove(index);
-//            root.getChildren().add(playerContainer);
-//        }else{
-//            root.getChildren().add(playerContainer);
-//        }
-//        if (ammountOfTime != 0) {
-//            if(currentPicture<7) {
-//                drawIdle(ammountOfTime--,currentPicture++, x, y);
-//            }else{
-//                drawIdle(ammountOfTime--,0,x,y);
-//            }
-//        }
     }
 }

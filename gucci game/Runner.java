@@ -15,11 +15,14 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-import java.util.ArrayList;
+import java.util.*;
 
 public class Runner extends Application {
     private ArrayList<String> idList = new ArrayList<>();
+    private HashMap<KeyCode, Boolean> pressedKeys = new HashMap<>();
+    private ArrayList<KeyCode> presetKeys = new ArrayList<>();
     private Pane root;
+    private Pane player;
     private int cloutCount;
     private boolean keyHeld;
     private boolean gameStart = false;
@@ -28,6 +31,10 @@ public class Runner extends Application {
 
     public Runner() {
         root = new Pane();
+        presetKeys.add(KeyCode.W);
+        pressedKeys.put(KeyCode.W, false);
+        System.out.println(pressedKeys.get(KeyCode.W));
+
         idlePose = new ArrayList<>();
         for (int i = 0; i < 8; i++) {
             ImageView iv = new ImageView("resources/Main_Character/idle/000" + i + ".png");
@@ -39,13 +46,18 @@ public class Runner extends Application {
     public static void main(String[] args) {
         launch(args);
     }
+    private void timer(){
+        Timer t = new Timer();
+        t.schedule(new TimerTask() {
+            public void run() {
+                //if()
+                timer();
+            }
+        },1);
+    }
     public void start(Stage primaryStage) throws Exception {
         root.getChildren().add(titleScreen());
-        root.setOnKeyPressed(event -> {
-            if (gameStart) {
-                System.out.println(event.getCode());
-            }
-        });
+        timer();
 
         primaryStage.setScene(new Scene(root, 800, 600));
         primaryStage.show();
@@ -155,20 +167,38 @@ public class Runner extends Application {
                 }
                 drawOptionsMenu();
             }
+            System.out.println(event.getCode());
         });
 
         return miniPane;
     }
     private void initGame() {
         root.getChildren().clear();
-        root.setFocusTraversable(true);
+        root.requestFocus();
+        root.setOnKeyPressed(event -> {
+            for(int i = 0; i<presetKeys.size(); i++){
+                if(presetKeys.get(i)==event.getCode()){
+                    keyHeld = true;
+                }
+            }
+        });
+        root.setOnKeyReleased(event -> {
+            Set<KeyCode> keys = pressedKeys.keySet();
+            for(int k = 0; k<pressedKeys.size(); k++) {
+                System.out.println(pressedKeys.values());
+                if(pressedKeys.values().contains(true)) {
+                    for (int i = 0; i < presetKeys.size(); i++) {
+                        for (int f = 0; f < keys.size(); f++) {
+                            if (keys.contains(presetKeys.get(i))) {
+                                pressedKeys.replace(presetKeys.get(i), false);
+                            }
+                        }
+                    }
+                }
+            }
+        });
 
-        Rectangle r1 = new Rectangle(0, 0, 800, 600);
-        r1.setFill(Color.GREEN);
-        root.getChildren().add(r1);
-        drawIdle(20,0,100,100);
     }
-
     private void drawOptionsMenu() {
         Pane miniPane = new Pane();
         miniPane.setLayoutX(200);
@@ -231,34 +261,34 @@ public class Runner extends Application {
     }
 
     private void drawIdle(int ammountOfTime, int currentPicture, double x, double y) {
-        Pane playerContainer = new Pane();
-        playerContainer.setLayoutY(y);
-        playerContainer.setLayoutX(x);
-
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        int index = -1;
-        for(int i = 0;i<root.getChildren().size(); i++){
-            if(root.getChildren().get(i)==playerContainer){
-                index = i;
-            }
-        }
-        if(index>0){
-            root.getChildren().remove(index);
-            root.getChildren().add(playerContainer);
-        }else{
-            root.getChildren().add(playerContainer);
-        }
-        if (ammountOfTime != 0) {
-            if(currentPicture<7) {
-                drawIdle(ammountOfTime--,currentPicture++, x, y);
-            }else{
-                drawIdle(ammountOfTime--,0,x,y);
-            }
-        }
+//        Pane playerContainer = new Pane();
+//        playerContainer.setLayoutY(y);
+//        playerContainer.setLayoutX(x);
+//
+//        try {
+//            Thread.sleep(100);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//
+//        int index = -1;
+//        for(int i = 0;i<root.getChildren().size(); i++){
+//            if(root.getChildren().get(i)==playerContainer){
+//                index = i;
+//            }
+//        }
+//        if(index>0){
+//            root.getChildren().remove(index);
+//            root.getChildren().add(playerContainer);
+//        }else{
+//            root.getChildren().add(playerContainer);
+//        }
+//        if (ammountOfTime != 0) {
+//            if(currentPicture<7) {
+//                drawIdle(ammountOfTime--,currentPicture++, x, y);
+//            }else{
+//                drawIdle(ammountOfTime--,0,x,y);
+//            }
+//        }
     }
 }

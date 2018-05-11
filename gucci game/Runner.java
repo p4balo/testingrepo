@@ -1,3 +1,4 @@
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -21,19 +22,38 @@ public class Runner extends Application {
     private ArrayList<String> idList = new ArrayList<>();
     private HashMap<KeyCode, Boolean> pressedKeys = new HashMap<>();
     private ArrayList<KeyCode> presetKeys = new ArrayList<>();
+    private ArrayList<String> inventory = new ArrayList<>();
     private Pane root;
     private Pane player;
+    private ImageView NPC1;
+    private ImageView NPC2;
+    private ImageView object1;
     private int cloutCount;
+    private int currentStep;
+    private long diologTimer;
     private boolean keyHeld;
     private boolean gameStart = false;
     private boolean idle = false;
+    private boolean currentDiolog = false;
     private ArrayList<ImageView> idlePose;
 
     public Runner() {
+        currentStep = 0;
+
         root = new Pane();
+        player = new Pane();
+        player.setLayoutY(100);
+        player.setLayoutX(100);
+
         presetKeys.add(KeyCode.W);
+        presetKeys.add(KeyCode.A);
+        presetKeys.add(KeyCode.S);
+        presetKeys.add(KeyCode.D);
+
         pressedKeys.put(KeyCode.W, false);
-        System.out.println(pressedKeys.get(KeyCode.W));
+        pressedKeys.put(KeyCode.A, false);
+        pressedKeys.put(KeyCode.S, false);
+        pressedKeys.put(KeyCode.D, false);
 
         idlePose = new ArrayList<>();
         for (int i = 0; i < 8; i++) {
@@ -47,16 +67,71 @@ public class Runner extends Application {
         launch(args);
     }
     private void timer(){
-        Timer t = new Timer();
-        t.schedule(new TimerTask() {
-            public void run() {
-                //if()
-                timer();
+        new AnimationTimer(){
+            @Override
+            public void handle(long now) {
+                for(int i = 0; i<presetKeys.size(); i++){
+                    if(pressedKeys.get(presetKeys.get(i))) {
+                        if (presetKeys.get(i) == KeyCode.W) {
+                            moveUp();
+                        }
+                        if (presetKeys.get(i) == KeyCode.A) {
+                            moveLeft();
+                        }
+                        if (presetKeys.get(i) == KeyCode.S) {
+                            moveDown();
+                        }
+                        if (presetKeys.get(i) == KeyCode.D) {
+                            moveRight();
+                        }
+                    }
+                }
+                if(currentDiolog){
+                    diologTimer++;
+                    if(diologTimer==350){
+                        for(int i = 0; i<root.getChildren().size(); i++){
+                            if(root.getChildren().get(i).getId()!=null){
+                                if(root.getChildren().get(i).getId().contains("dialog")){
+                                    root.getChildren().remove(i);
+                                    i--;
+                                }
+                            }
+                        }
+                        currentDiolog = false;
+                        diologTimer = 0;
+                    }
+                }
             }
-        },1);
+        }.start();
     }
     public void start(Stage primaryStage) throws Exception {
         root.getChildren().add(titleScreen());
+        ImageView iv = new ImageView("resources/Main_Character/idle/0000.png");
+        iv.setFitWidth(125);
+        iv.setFitHeight(200);
+        player.getChildren().add(iv);
+        player.setMaxSize(125,200);
+
+        NPC1 = new ImageView("resources/Ninja/Idle/0000.png");
+        NPC1.setFitHeight(200);
+        NPC1.setFitWidth(125);
+        NPC1.setLayoutY(100);
+        NPC1.setLayoutX(500);
+        NPC1.setId("objN");
+
+        NPC2 = new ImageView("resources/Pirate/Idle/0000.png");
+        NPC2.setFitHeight(200);
+        NPC2.setFitWidth(125);
+        NPC2.setLayoutY(400);
+        NPC2.setLayoutX(200);
+        NPC2.setId("objP");
+
+        object1 = new ImageView("resources/Objects/belt.png");
+        object1.setFitHeight(90);
+        object1.setFitWidth(150);
+        object1.setLayoutY(50);
+        object1.setLayoutX(100);
+        object1.setId("objB");
         timer();
 
         primaryStage.setScene(new Scene(root, 800, 600));
@@ -167,7 +242,6 @@ public class Runner extends Application {
                 }
                 drawOptionsMenu();
             }
-            System.out.println(event.getCode());
         });
 
         return miniPane;
@@ -175,17 +249,25 @@ public class Runner extends Application {
     private void initGame() {
         root.getChildren().clear();
         root.requestFocus();
+        root.getChildren().add(player);
+        root.getChildren().add(NPC1);
+        root.getChildren().add(NPC2);
+        root.getChildren().add(object1);
+
         root.setOnKeyPressed(event -> {
             for(int i = 0; i<presetKeys.size(); i++){
                 if(presetKeys.get(i)==event.getCode()){
-                    keyHeld = true;
+                    pressedKeys.replace(presetKeys.get(i), true);
                 }
+            }
+            if(event.getCode()==KeyCode.E){
+
+                checkPosition(player.getLayoutX(),player.getLayoutY());
             }
         });
         root.setOnKeyReleased(event -> {
             Set<KeyCode> keys = pressedKeys.keySet();
             for(int k = 0; k<pressedKeys.size(); k++) {
-                System.out.println(pressedKeys.values());
                 if(pressedKeys.values().contains(true)) {
                     for (int i = 0; i < presetKeys.size(); i++) {
                         for (int f = 0; f < keys.size(); f++) {
@@ -198,6 +280,18 @@ public class Runner extends Application {
             }
         });
 
+    }
+    private void moveUp(){
+        player.setLayoutY(player.getLayoutY()-1);
+    }
+    private void moveLeft(){
+        player.setLayoutX(player.getLayoutX()-1);
+    }
+    private void moveRight(){
+        player.setLayoutX(player.getLayoutX()+1);
+    }
+    private void moveDown(){
+        player.setLayoutY(player.getLayoutY()+1);
     }
     private void drawOptionsMenu() {
         Pane miniPane = new Pane();
@@ -259,36 +353,80 @@ public class Runner extends Application {
 
         root.getChildren().add(miniPane);
     }
-
-    private void drawIdle(int ammountOfTime, int currentPicture, double x, double y) {
-//        Pane playerContainer = new Pane();
-//        playerContainer.setLayoutY(y);
-//        playerContainer.setLayoutX(x);
-//
-//        try {
-//            Thread.sleep(100);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//
-//        int index = -1;
-//        for(int i = 0;i<root.getChildren().size(); i++){
-//            if(root.getChildren().get(i)==playerContainer){
-//                index = i;
-//            }
-//        }
-//        if(index>0){
-//            root.getChildren().remove(index);
-//            root.getChildren().add(playerContainer);
-//        }else{
-//            root.getChildren().add(playerContainer);
-//        }
-//        if (ammountOfTime != 0) {
-//            if(currentPicture<7) {
-//                drawIdle(ammountOfTime--,currentPicture++, x, y);
-//            }else{
-//                drawIdle(ammountOfTime--,0,x,y);
-//            }
-//        }
+    private void checkPosition(double x, double y){
+        for(int i = 0; i<root.getChildren().size(); i++){
+            if(root.getChildren().get(i).getId()!=null){
+                if(root.getChildren().get(i).getId().contains("obj")){
+                    Rectangle r1 = new Rectangle(root.getChildren().get(i).getLayoutX(),root.getChildren().get(i).getLayoutY(), 125,200);
+                    root.getChildren().add(r1);
+                    //System.out.println(root.getChildren().get(i).getId().contains("N"));
+                    System.out.println(r1.intersects(x,y,1,1));
+//                    System.out.println(r1.contains(115,515));
+                    if(r1.contains(x,y)){
+                        System.out.println("test");
+                        if(root.getChildren().get(i).getId().contains("N")){
+                            initDiolauge(currentStep,"Ninja");
+                        }
+                    }
+                }
+            }
+        }
+        if(NPC1.contains(x,y)){
+            initDiolauge(currentStep, "Ninja");
+        }
+        if(NPC2.contains(x,y)){
+            initDiolauge(currentStep, "Pirate");
+        }
+        if(object1.contains(x,y)){
+            collectItem("Belt");
+        }
+    }
+    private void initDiolauge(int step, String character){
+        currentDiolog = true;
+        Rectangle r = new Rectangle(0,500,800,100);
+        r.setId("dialog");
+        r.setStrokeWidth(5);
+        r.setStroke(Color.BLACK);
+        r.setFill(Color.WHITE);
+        root.getChildren().add(r);
+        if(step==-1&&character.equals("item")){
+            int selector = (int) (Math.random()*(3));
+            Text t = new Text();
+            t.setId("dialog");
+            if(selector==0){
+                t.setText("Player:\nNice we copped that new grucci");
+            }
+            if(selector==1){
+                t.setText("Player:\nHellllllo epic department");
+            }
+            if(selector==2){
+                t.setText("Player:\nWe got that new supreme drop");
+            }
+            t.setFont(new Font(28));
+            t.setLayoutY(535);
+            t.setLayoutX(20);
+            t.setWrappingWidth(760);
+            root.getChildren().add(t);
+        }else if(step==0&&character.equals("Ninja")){
+            Text t = new Text("Ninja:\nBruh do you got that grucci belt?");
+            t.setId("dialog");
+            t.setFont(new Font(28));
+            t.setLayoutY(535);
+            t.setLayoutX(20);
+            t.setWrappingWidth(760);
+            root.getChildren().add(t);
+        }else if(step==0&&character.equals("Pirate")){
+            Text t = new Text("Pirate:\nAyo yall got my gucci belt");
+            t.setId("dialog");
+            t.setFont(new Font(28));
+            t.setLayoutY(535);
+            t.setLayoutX(20);
+            t.setWrappingWidth(760);
+            root.getChildren().add(t);
+        }
+    }
+    private void collectItem(String item){
+        inventory.add(item);
+        initDiolauge(-1,"item");
     }
 }

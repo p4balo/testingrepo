@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="81cc9465-016e-4d28-9a06-15f1ddcba9d8" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/gucci game/resources/Objects/redX.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gucci game/Runner.java" beforeDir="false" afterPath="$PROJECT_DIR$/gucci game/Runner.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -19,16 +17,14 @@
       <file leaf-file-name="Runner.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/gucci game/Runner.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="145">
-              <caret line="252" column="14" lean-forward="true" selection-start-line="252" selection-start-column="14" selection-end-line="252" selection-end-column="14" />
+            <state relative-caret-position="221">
+              <caret line="28" column="16" lean-forward="true" selection-start-line="28" selection-start-column="16" selection-end-line="28" selection-end-column="16" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="method#Runner#0;class#Runner#0" />
-                <element signature="method#start#0;class#Runner#0" />
-                <element signature="method#titleScreen#0;class#Runner#0" />
-                <element signature="e#3955#4209#0" />
-                <element signature="e#4290#4618#0" />
-                <element signature="method#drawOptionsMenu#0;class#Runner#0" />
+                <element signature="e#1521#1522#0" expanded="true" />
+                <element signature="e#1549#1550#0" expanded="true" />
+                <element signature="e#1627#1748#0" expanded="true" />
+                <element signature="e#1747#1748#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -54,6 +50,8 @@
       <find>masterkey.json</find>
       <find>redX</find>
       <find>setOnKey</find>
+      <find>onke</find>
+      <find>set</find>
     </findStrings>
     <replaceStrings>
       <replace>timeKeeper</replace>
@@ -89,7 +87,9 @@
         <option value="$PROJECT_DIR$/gucci game/PictureStorage.java" />
         <option value="$PROJECT_DIR$/gucci game/Stylesheet.css" />
         <option value="$PROJECT_DIR$/gucci game/Player.java" />
+        <option value="$PROJECT_DIR$/gucci game/TEst.java" />
         <option value="$PROJECT_DIR$/gucci game/Runner.java" />
+        <option value="$PROJECT_DIR$/gucci game/Test.java" />
       </list>
     </option>
   </component>
@@ -105,6 +105,9 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
+  <component name="NodePackageJsonFileManager">
+    <packageJsonPaths />
+  </component>
   <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="-1" />
     <option name="y" value="25" />
@@ -119,51 +122,46 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="AndroidView" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
             <path>
-              <item name="testingrepository" type="b2602c69:ProjectViewProjectNode" />
-              <item name="testingrepository" type="462c0819:PsiDirectoryNode" />
+              <item name="testingrepo" type="b2602c69:ProjectViewProjectNode" />
+              <item name="testingrepo" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
-              <item name="testingrepository" type="b2602c69:ProjectViewProjectNode" />
-              <item name="testingrepository" type="462c0819:PsiDirectoryNode" />
+              <item name="testingrepo" type="b2602c69:ProjectViewProjectNode" />
+              <item name="testingrepo" type="462c0819:PsiDirectoryNode" />
               <item name="gucci game" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
-              <item name="testingrepository" type="b2602c69:ProjectViewProjectNode" />
-              <item name="testingrepository" type="462c0819:PsiDirectoryNode" />
+              <item name="testingrepo" type="b2602c69:ProjectViewProjectNode" />
+              <item name="testingrepo" type="462c0819:PsiDirectoryNode" />
               <item name="gucci game" type="462c0819:PsiDirectoryNode" />
               <item name="resources" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
-              <item name="testingrepository" type="b2602c69:ProjectViewProjectNode" />
-              <item name="testingrepository" type="462c0819:PsiDirectoryNode" />
+              <item name="testingrepo" type="b2602c69:ProjectViewProjectNode" />
+              <item name="testingrepo" type="462c0819:PsiDirectoryNode" />
               <item name="gucci game" type="462c0819:PsiDirectoryNode" />
               <item name="resources" type="462c0819:PsiDirectoryNode" />
               <item name="Main_Character" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
-              <item name="testingrepository" type="b2602c69:ProjectViewProjectNode" />
-              <item name="testingrepository" type="462c0819:PsiDirectoryNode" />
+              <item name="testingrepo" type="b2602c69:ProjectViewProjectNode" />
+              <item name="testingrepo" type="462c0819:PsiDirectoryNode" />
               <item name="gucci game" type="462c0819:PsiDirectoryNode" />
               <item name="resources" type="462c0819:PsiDirectoryNode" />
               <item name="Main_Character" type="462c0819:PsiDirectoryNode" />
               <item name="idle" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="testingrepository" type="b2602c69:ProjectViewProjectNode" />
-              <item name="testingrepository" type="462c0819:PsiDirectoryNode" />
-              <item name="PasswordGen" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -173,8 +171,8 @@
     <property name="list.type.of.created.stylesheet" value="CSS" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="project.structure.last.edited" value="Modules" />
-    <property name="project.structure.proportion" value="0.0" />
+    <property name="project.structure.last.edited" value="Project" />
+    <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="preferences.externalResources" />
   </component>
@@ -206,9 +204,11 @@
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
     </configuration>
     <configuration name="Runner" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="ALTERNATIVE_JRE_PATH" value="10" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="MAIN_CLASS_NAME" value="Runner" />
       <module name="gucci game" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
     </configuration>
     <configuration default="true" type="Application" factoryName="Application">
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
@@ -356,41 +356,64 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="78547000" />
+    <option name="totallyTimeSpent" value="79399000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1" y="25" width="1368" height="744" extended-state="6" />
+    <frame x="-7" y="0" width="974" height="1047" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info anchor="right" id="Palette" order="3" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Messages" order="8" weight="0.3271028" />
+      <window_info active="true" anchor="bottom" id="Messages" order="8" visible="true" weight="0.32618025" />
       <window_info anchor="right" id="Palette&#9;" order="6" />
       <window_info id="Image Layers" order="5" />
       <window_info anchor="right" id="Capture Analysis" order="7" />
       <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50073206" side_tool="true" weight="0.30529594" />
       <window_info anchor="right" id="Maven Projects" order="4" />
       <window_info anchor="bottom" id="Database Changes" order="12" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.49926794" weight="0.30472103" />
       <window_info anchor="bottom" id="Version Control" order="9" weight="0.32866043" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49926794" visible="true" weight="0.30529594" />
       <window_info anchor="bottom" id="Terminal" order="10" />
       <window_info id="Capture Tool" order="2" />
       <window_info id="Designer" order="3" />
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.14787701" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.14718163" />
       <window_info anchor="right" id="Database" order="5" />
-      <window_info anchor="bottom" id="Find" order="1" sideWeight="0.4956076" weight="0.32866043" />
+      <window_info id="Learn" order="6" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info id="UI Designer" order="4" />
       <window_info anchor="right" id="Theme Preview" order="8" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info id="Favorites" order="6" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Event Log" order="7" sideWeight="0.50073206" side_tool="true" weight="0.30529594" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.14787701" />
+      <window_info id="Favorites" order="6" side_tool="true" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info anchor="bottom" id="Terminal" order="10" />
+      <window_info anchor="right" id="Palette&#9;" order="6" />
+      <window_info anchor="right" id="Maven Projects" order="4" />
+      <window_info anchor="bottom" id="Database Changes" order="12" show_stripe_button="false" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39875388" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
+      <window_info id="Image Layers" order="5" />
+      <window_info anchor="right" id="Theme Preview" order="8" />
+      <window_info anchor="right" id="Database" order="5" />
+      <window_info id="Capture Tool" order="2" />
+      <window_info anchor="bottom" id="Version Control" order="9" weight="0.32866043" />
+      <window_info anchor="right" id="Capture Analysis" order="7" />
+      <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Inspection Results" order="11" weight="0.32868218" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info id="UI Designer" order="4" />
+      <window_info anchor="bottom" id="Find" order="1" sideWeight="0.4956076" weight="0.32866043" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49926794" visible="true" weight="0.30529594" />
+      <window_info anchor="bottom" id="Messages" order="8" weight="0.3271028" />
+      <window_info anchor="right" id="Palette" order="3" />
+      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
+      <window_info id="Designer" order="3" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -415,10 +438,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="12135">
           <caret line="809" column="16" selection-start-line="809" selection-start-column="16" selection-end-line="811" selection-end-column="35" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="method#checkData#0;class#passwordGenerator#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -443,15 +462,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1560">
           <caret line="104" column="58" selection-start-line="104" selection-start-column="58" selection-end-line="104" selection-end-column="58" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="method#getTime#0;class#test#0" />
-            <element signature="method#formatTime#0;class#test#0" />
-            <element signature="method#createWindow#0;class#test#0" />
-            <element signature="method#createWindow#1;class#test#0" />
-            <element signature="method#createWindow#2;class#test#0" />
-            <element signature="e#14012#14653#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -466,10 +476,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="12660">
           <caret line="844" column="33" selection-start-line="844" selection-start-column="33" selection-end-line="844" selection-end-column="33" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="method#checkData#0;class#passwordGenerator#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -477,15 +483,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1485">
           <caret line="99" column="33" lean-forward="true" selection-start-line="99" selection-start-column="33" selection-end-line="99" selection-end-column="33" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="method#getTime#0;class#test#0" />
-            <element signature="method#formatTime#0;class#test#0" />
-            <element signature="method#createWindow#0;class#test#0" />
-            <element signature="method#createWindow#1;class#test#0" />
-            <element signature="method#createWindow#2;class#test#0" />
-            <element signature="e#14012#14653#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -500,10 +497,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="12660">
           <caret line="844" column="33" lean-forward="true" selection-start-line="844" selection-start-column="33" selection-end-line="844" selection-end-column="33" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="method#checkData#0;class#passwordGenerator#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -528,15 +521,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="216">
           <caret line="400" column="42" selection-start-line="400" selection-start-column="42" selection-end-line="400" selection-end-column="42" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="method#getTime#0;class#test#0" />
-            <element signature="method#formatTime#0;class#test#0" />
-            <element signature="method#createWindow#0;class#test#0" />
-            <element signature="method#createWindow#1;class#test#0" />
-            <element signature="method#createWindow#2;class#test#0" />
-            <element signature="e#14012#14653#0" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -546,39 +530,19 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="60">
           <caret line="810" column="36" lean-forward="true" selection-start-line="810" selection-start-column="36" selection-end-line="810" selection-end-column="36" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="method#checkData#0;class#passwordGenerator#0" />
-          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/gucci game/MenuStorage.java" />
     <entry file="file://$PROJECT_DIR$/gucci game/CharacterInformation.java" />
     <entry file="file://$PROJECT_DIR$/gucci game/PolyMaker.java" />
-    <entry file="file://$PROJECT_DIR$/gucci game/PictureStorage.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="45">
-          <caret line="5" column="10" selection-start-line="5" selection-start-column="10" selection-end-line="5" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/gucci game/cog.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/gucci game/PictureStorage.java" />
+    <entry file="file://$PROJECT_DIR$/gucci game/cog.png" />
     <entry file="file://$PROJECT_DIR$/gucci game/Stylesheet.css">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/gucci game/Tahoma.ttf">
-      <provider selected="true" editor-type-id="fontseditor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/gucci game/Player.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="1" column="4" selection-start-line="1" selection-start-column="4" selection-end-line="1" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/gucci game/Tahoma.ttf" />
+    <entry file="file://$PROJECT_DIR$/gucci game/Player.java" />
     <entry file="file://$PROJECT_DIR$/gucci game/resources/Main_Character/idle/0006.png">
       <provider selected="true" editor-type-id="images" />
     </entry>
@@ -602,16 +566,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/gucci game/Runner.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="145">
-          <caret line="252" column="14" lean-forward="true" selection-start-line="252" selection-start-column="14" selection-end-line="252" selection-end-column="14" />
+        <state relative-caret-position="221">
+          <caret line="28" column="16" lean-forward="true" selection-start-line="28" selection-start-column="16" selection-end-line="28" selection-end-column="16" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="method#Runner#0;class#Runner#0" />
-            <element signature="method#start#0;class#Runner#0" />
-            <element signature="method#titleScreen#0;class#Runner#0" />
-            <element signature="e#3955#4209#0" />
-            <element signature="e#4290#4618#0" />
-            <element signature="method#drawOptionsMenu#0;class#Runner#0" />
+            <element signature="e#1521#1522#0" expanded="true" />
+            <element signature="e#1549#1550#0" expanded="true" />
+            <element signature="e#1627#1748#0" expanded="true" />
+            <element signature="e#1747#1748#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -656,7 +618,7 @@
       </state>
       <state key="JdkListConfigurable.UI">
         <settings>
-          <last-edited>1.8</last-edited>
+          <last-edited>10</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>
@@ -668,11 +630,12 @@
       </state>
       <state key="ModuleStructureConfigurable.UI">
         <settings>
-          <last-edited>testingrepository</last-edited>
+          <last-edited>gucci game</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>
                 <option value="0.2" />
+                <option value="0.6" />
               </list>
             </option>
           </splitter-proportions>

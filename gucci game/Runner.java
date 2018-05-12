@@ -277,11 +277,9 @@ public class Runner extends Application {
             Set<KeyCode> keys = pressedKeys.keySet();
             for(int k = 0; k<pressedKeys.size(); k++) {
                 if(pressedKeys.values().contains(true)) {
-                    for (int i = 0; i < presetKeys.size(); i++) {
-                        for (int f = 0; f < keys.size(); f++) {
-                            if (keys.contains(event.getCode())) {
-                                pressedKeys.replace(event.getCode(), false);
-                            }
+                    for (int f = 0; f < keys.size(); f++) {
+                        if (keys.contains(event.getCode())) {
+                            pressedKeys.replace(event.getCode(), false);
                         }
                     }
                 }
@@ -295,7 +293,16 @@ public class Runner extends Application {
         for(int i = 0; i<root.getChildren().size(); i++){
             if(root.getChildren().get(i).getId()!=null){
                 if(root.getChildren().get(i).getId().contains("obj")){
-
+                    ImageView iv = (ImageView) root.getChildren().get(i);
+                    Rectangle r = new Rectangle(root.getChildren().get(i).getLayoutX(),root.getChildren().get(i).getLayoutY()
+                            ,iv.getFitWidth(),iv.getFitHeight());
+                    for(int k = x; k<x+player.getFitWidth(); k++){
+                        for(int j = y; j<y+player.getFitHeight(); j++){
+                            if((k>r.getLayoutX()&&k<r.getLayoutX()+r.getWidth())&&(j>r.getLayoutY()&&j<r.getLayoutY()+r.getHeight())){
+                                System.out.println("test");
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -339,17 +346,17 @@ public class Runner extends Application {
         }
     }
     private void moveUp(){
-        player.setLayoutY(player.getLayoutY()-.7);
+        player.setLayoutY(player.getLayoutY()-.5);
     }
     private void moveLeft(){
-        player.setLayoutX(player.getLayoutX()-.7);
+        player.setLayoutX(player.getLayoutX()-.5);
         player.setRotate(0);
     }
     private void moveDown(){
-        player.setLayoutY(player.getLayoutY()+.7);
+        player.setLayoutY(player.getLayoutY()+.5);
     }
     private void moveRight(){
-        player.setLayoutX(player.getLayoutX()+.7);
+        player.setLayoutX(player.getLayoutX()+.5);
         player.setRotate(180);
     }
     private void drawOptionsMenu() {

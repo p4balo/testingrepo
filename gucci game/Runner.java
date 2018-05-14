@@ -363,6 +363,7 @@ public class Runner extends Application {
 
         return miniPane;
     }
+    @SuppressWarnings("Duplicates")
     private void initGame() {
         currentScene = 1;
         root.getChildren().clear();

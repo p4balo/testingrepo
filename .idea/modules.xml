@@ -4,7 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/PasswordGen/PasswordGen.iml" filepath="$PROJECT_DIR$/PasswordGen/PasswordGen.iml" />
       <module fileurl="file://$PROJECT_DIR$/gucci game/gucci game.iml" filepath="$PROJECT_DIR$/gucci game/gucci game.iml" />
-      <module fileurl="file://$PROJECT_DIR$/testingrepo.iml" filepath="$PROJECT_DIR$/testingrepo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/testingrepository.iml" filepath="$PROJECT_DIR$/testingrepository.iml" />
     </modules>
   </component>
 </project>

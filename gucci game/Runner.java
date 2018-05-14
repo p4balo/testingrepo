@@ -1,12 +1,14 @@
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -33,6 +35,8 @@ public class Runner extends Application {
     private ArrayList<Image> runningPosePlayer = new ArrayList<>();
     private ArrayList<Image> idlePosenpc1 = new ArrayList<>();
     private ArrayList<Image> idlePosenpc2 = new ArrayList<>();
+    private ObservableList<InventoryData> data = FXCollections.observableArrayList();
+    private TableView<InventoryData> table = new TableView<>();
     private Pane root;
     private ImageView background;
     private ImageView player;
@@ -54,15 +58,17 @@ public class Runner extends Application {
     private int dialogCounter = 0;
     private int currentIdleImagePlayer = 0;
     private int currentMovingImage = 0;
+    private int currentMovingDecrement = 5;
     private int idleCountNPC;
     private int currentScene;
     private double movementIncrement;
     private boolean moving = false;
     private boolean running = false;
     private boolean activeDialog;
+    private boolean containsBackpack;
 
     public Runner() {
-        currentDialog = 0;
+        currentDialog = -2;
 
         npc1 = new ImageView("resources/Knight/idle/0000.png");
         npc1.setLayoutX(500);
@@ -160,6 +166,7 @@ public class Runner extends Application {
             movementIncrement = 4;
         }else{
             movementIncrement = .5;
+            currentMovingDecrement = 15;
         }
 
         background = backgrounds.get((int)(Math.random()* backgrounds.size()));
@@ -175,11 +182,11 @@ public class Runner extends Application {
                     moving = pressedKeys.values().contains(true);
                 }
                 if(moving){
-                    if((currentMovingImage/5)==idlePosePlayer.size()){
+                    if((currentMovingImage/currentMovingDecrement)==idlePosePlayer.size()){
                         currentMovingImage = 0;
                     }
-                    if(currentMovingImage%5==0){
-                        player.setImage(movingPosePlayer.get(currentMovingImage/5));
+                    if(currentMovingImage%currentMovingDecrement==0){
+                        player.setImage(movingPosePlayer.get(currentMovingImage/currentMovingDecrement));
                     }
                     currentMovingImage++;
                 }else{
@@ -220,6 +227,9 @@ public class Runner extends Application {
                         }
                         dialogCounter = 0;
                         activeDialog = false;
+                        if(currentDialog==-1){
+                            initDialog(null);
+                        }
                     }
                 }
                 if((idleCountNPC/10)==idlePosenpc1.size()){
@@ -256,6 +266,7 @@ public class Runner extends Application {
         primaryStage.setTitle("Gucci Game");
         primaryStage.getIcons().add(new Image("resources/Objects/Gucci.png"));
     }
+    @SuppressWarnings("Duplicates")
     private Pane titleScreen() {
         Pane miniPane = new Pane();
         miniPane.setId("Title");
@@ -379,6 +390,9 @@ public class Runner extends Application {
         root.getChildren().add(object1Hitbox);
         root.getChildren().add(object2);
         root.getChildren().add(object2Hitbox);
+        if(currentDialog==-2) {
+            initDialog(null);
+        }
         root.setOnKeyPressed(event -> {
             for(int i = 0; i<presetKeys.size(); i++){
                 if(presetKeys.get(i)==event.getCode()){
@@ -394,6 +408,13 @@ public class Runner extends Application {
                     n.setEffect(new GaussianBlur());
                 }
                 drawOptionsMenu();
+            }
+            if(event.getCode()==KeyCode.TAB){
+                for (int i = 0; i < root.getChildren().size(); i++) {
+                    Node n = root.getChildren().get(i);
+                    n.setEffect(new GaussianBlur());
+                }
+                drawInventory();
             }
         });
         root.setOnKeyReleased(event -> {
@@ -425,30 +446,36 @@ public class Runner extends Application {
                         case "objK":
                             if (((x > npc1XY.getX() && x < npc1XY.getX() + r.getWidth()) || (x + width > npc1XY.getX() && x + width < npc1XY.getX() + r.getWidth())) &&
                                     ((y > npc1XY.getY() && y < npc1XY.getY() + r.getHeight()) || (y + height > npc1XY.getY() && y + height < npc1XY.getY() + r.getHeight()))) {
-                                System.out.println("test");
                                 initDialog("Knight");
                             }
                             break;
                         case "objN":
                             if (((x > npc2XY.getX() && x < npc2XY.getX() + r.getWidth()) || (x + width > npc2XY.getX() && x + width < npc2XY.getX() + r.getWidth())) &&
                                     ((y > npc2XY.getY() && y < npc2XY.getY() + r.getHeight()) || (y + height > npc2XY.getY() && y + height < npc2XY.getY() + r.getHeight()))) {
-                                System.out.println("test");
                                 initDialog("Ninja");
                             }
                             break;
                         case "objInventoryBelt":
                             if (((x > object1XY.getX() && x < object1XY.getX() + r.getWidth()) || (x + width > object1XY.getX() && x + width < object1XY.getX() + r.getWidth())) &&
                                     ((y > object1XY.getY() && y < object1XY.getY() + r.getHeight()) || (y + height > object1XY.getY() && y + height < object1XY.getY() + r.getHeight()))) {
-                                System.out.println("test");
-                                initDialog("ObjectBelt");
+                                initDialog("Belt");
                             }
                             break;
                         case "objInventoryBackpack":
                             if (((x > object2XY.getX() && x < object2XY.getX() + r.getWidth()) || (x + width > object2XY.getX() && x + width < object2XY.getX() + r.getWidth())) &&
                                     ((y > object2XY.getY() && y < object2XY.getY() + r.getHeight()) || (y + height > object2XY.getY() && y + height < object2XY.getY() + r.getHeight()))) {
-                                System.out.println("test");
-                                initDialog("ObjectBackpack");
+                                initDialog("Backpack");
                             }
+                            break;
+                        case "a":
+                            break;
+                        case "b":
+                            break;
+                        case "c":
+                            break;
+                        case "d":
+                            break;
+                        case "e":
                             break;
                     }
 
@@ -464,26 +491,8 @@ public class Runner extends Application {
         r.setStrokeWidth(3);
         r.setId("dialog");
         root.getChildren().add(r);
-        if(currentDialog==0){
-            Text t = new Text("Ninja:\nHey could you get me my gucci belt");
-            t.setLayoutX(15);
-            t.setLayoutY(530);
-            t.setFont(new Font(28));
-            t.setWrappingWidth(760);
-            t.setId("dialog");
-            root.getChildren().add(t);
-            currentDialog++;
-        }else if(currentDialog==1){
-            Text t = new Text("Player:\nAyy we copped that new grucci");
-            t.setLayoutX(15);
-            t.setLayoutY(530);
-            t.setFont(new Font(28));
-            t.setWrappingWidth(760);
-            t.setId("dialog");
-            root.getChildren().add(t);
-            currentDialog++;
-        }else if(currentDialog==2){
-            Text t = new Text("Pirate:\nThanks Mane");
+        if(currentDialog==-2&&player==null){
+            Text t = new Text("Player:\nPress W, A, S, D to move, and E to interact");
             t.setLayoutX(15);
             t.setLayoutY(530);
             t.setFont(new Font(28));
@@ -492,13 +501,72 @@ public class Runner extends Application {
             root.getChildren().add(t);
             currentDialog++;
         }
+        else if(currentDialog==-1&&player==null){
+            Text t = new Text("Player:\nPress TAB to open inventory");
+            t.setLayoutX(15);
+            t.setLayoutY(530);
+            t.setFont(new Font(28));
+            t.setWrappingWidth(760);
+            t.setId("dialog");
+            root.getChildren().add(t);
+            currentDialog++;
+        }
+        else if (currentDialog==0&&player.equals("Ninja")){
+            Text t = new Text("Ninja:\nHey man, I just lost my gucci belt it would be so helpful if you found it");
+            t.setLayoutX(15);
+            t.setLayoutY(530);
+            t.setFont(new Font(28));
+            t.setWrappingWidth(760);
+            t.setId("dialog");
+            root.getChildren().add(t);
+            currentDialog++;
+        }
+        else if(currentDialog==0&&player.equals("Knight")){
+            Text t = new Text("Knight:\nWusspopin my boy over their looks like he needs some help");
+            t.setLayoutX(15);
+            t.setLayoutY(530);
+            t.setFont(new Font(28));
+            t.setWrappingWidth(760);
+            t.setId("dialog");
+            root.getChildren().add(t);
+        }
+        else if(player.equals("Belt")&&!containsBackpack){
+            Text t = new Text("Player:\nSorry broskii can't carry dont have a backpack");
+            t.setLayoutX(15);
+            t.setLayoutY(530);
+            t.setFont(new Font(28));
+            t.setWrappingWidth(760);
+            t.setId("dialog");
+            root.getChildren().add(t);
+        }
+        else if(player.equals("Belt")&&containsBackpack){
+            Text t = new Text("Player:\nNow we can give him his belt back");
+            t.setLayoutX(15);
+            t.setLayoutY(530);
+            t.setFont(new Font(28));
+            t.setWrappingWidth(760);
+            t.setId("dialog");
+            inventory.add("Belt");
+            root.getChildren().add(t);
+        }
+        else if(player.equals("Backpack")){
+            Text t = new Text("Player:\nAyy now we can carry stuff");
+            t.setLayoutX(15);
+            t.setLayoutY(530);
+            t.setFont(new Font(28));
+            t.setWrappingWidth(760);
+            t.setId("dialog");
+            root.getChildren().add(t);
+            currentDialog++;
+            containsBackpack = true;
+        }
     }
     private void moveUp(){
         player.setLayoutY(player.getLayoutY()-movementIncrement);
         playerHitbox.setLayoutY(playerHitbox.getLayoutY()-movementIncrement);
     }
     private void moveLeft(){
-        player.setLayoutX(player.getLayoutX()-4);
+        player.setLayoutX(player.getLayoutX()-movementIncrement);
         playerHitbox.setLayoutX(playerHitbox.getLayoutX()-movementIncrement);
         player.setRotate(0);
     }
@@ -576,5 +644,58 @@ public class Runner extends Application {
         });
 
         root.getChildren().add(miniPane);
+    }
+    private void drawInventory(){
+        Pane miniPane = new Pane();
+        miniPane.setLayoutX(200);
+        miniPane.setLayoutY(50);
+
+        Rectangle r = new Rectangle(300, 400);
+        r.setStrokeWidth(3);
+        r.setStroke(Color.BLACK);
+        r.setFill(Color.WHITE);
+        miniPane.getChildren().add(r);
+
+        Text t1 = new Text("Options");
+        t1.setFont(new Font(32));
+        t1.setLayoutY(47);
+        t1.setLayoutX(75);
+        miniPane.getChildren().add(t1);
+
+        root.requestFocus();
+        root.setOnKeyPressed(event -> {
+            root.getChildren().remove(miniPane);
+            if(event.getCode()==KeyCode.TAB){
+                for(int i = 0; i<root.getChildren().size(); i++){
+                    Node n = root.getChildren().get(i);
+                    n.setEffect(null);
+                }
+                initGame();
+            }
+        });
+
+        table.setEditable(true);
+
+        data.add(new InventoryData(player));
+
+        TableColumn<InventoryData, ImageView> firstColumn = new TableColumn<>("Images");
+        firstColumn.setCellValueFactory(new PropertyValueFactory<InventoryData, ImageView>("iv"));
+
+        table.getColumns().add(firstColumn);
+        table.setItems(data);
+        miniPane.getChildren().add(table);
+        root.getChildren().add(miniPane);
+    }
+    public static class InventoryData{
+        private final ImageView iv;
+        private InventoryData(ImageView i){
+            iv = i;
+        }
+        public void setImage(Image i){
+            iv.setImage(i);
+        }
+        public ImageView getImage(){
+            return iv;
+        }
     }
 }

@@ -1,7 +1,9 @@
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -14,54 +16,153 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.util.*;
 
 public class Runner extends Application {
-    private ArrayList<String> idList = new ArrayList<>();
     private HashMap<KeyCode, Boolean> pressedKeys = new HashMap<>();
+    private ArrayList<String> idList = new ArrayList<>();
     private ArrayList<KeyCode> presetKeys = new ArrayList<>();
     private ArrayList<String> inventory = new ArrayList<>();
+    private ArrayList<Image> idlePosePlayer = new ArrayList<>();
+    private ArrayList<Image> movingPosePlayer = new ArrayList<>();
+    private ArrayList<Image> runningPosePlayer = new ArrayList<>();
+    private ArrayList<Image> idlePosenpc1 = new ArrayList<>();
+    private ArrayList<Image> idlePosenpc2 = new ArrayList<>();
     private Pane root;
-    private Pane player;
-    private ImageView NPC1;
-    private ImageView NPC2;
+    private ImageView background;
+    private ImageView player;
+    private ImageView npc1;
+    private ImageView npc2;
     private ImageView object1;
+    private ImageView object2;
+    private Rectangle playerHitbox;
+    private Rectangle npc1Hitbox;
+    private Rectangle npc2Hitbox;
+    private Rectangle object1Hitbox;
+    private Rectangle object2Hitbox;
+    private Point2D npc1XY;
+    private Point2D npc2XY;
+    private Point2D object1XY;
+    private Point2D object2XY;
     private int cloutCount;
-    private int currentStep;
-    private long diologTimer;
-    private boolean keyHeld;
-    private boolean gameStart = false;
-    private boolean idle = false;
-    private boolean currentDiolog = false;
-    private ArrayList<ImageView> idlePose;
+    private int currentDialog;
+    private int dialogCounter = 0;
+    private int currentIdleImagePlayer = 0;
+    private int currentMovingImage = 0;
+    private int idleCountNPC;
+    private int currentScene;
+    private double movementIncrement;
+    private boolean moving = false;
+    private boolean running = false;
+    private boolean activeDialog;
 
     public Runner() {
-        currentStep = 0;
+        currentDialog = 0;
+
+        npc1 = new ImageView("resources/Knight/idle/0000.png");
+        npc1.setLayoutX(500);
+        npc1.setLayoutY(100);
+        npc1.setFitWidth(125);
+        npc1.setFitHeight(200);
+        npc1Hitbox = new Rectangle(npc1.getLayoutX()+25,npc1.getLayoutY()+45,npc1.getFitWidth()-30,npc1.getFitHeight()-55);
+        npc1Hitbox.setStroke(Color.BLACK);
+        npc1Hitbox.setStrokeWidth(3);
+        npc1Hitbox.setFill(Color.TRANSPARENT);
+        npc1Hitbox.setId("objK");
+        npc1XY = new Point2D(npc1.getLayoutX()+25,npc1.getLayoutY()+45);
+
+        npc2 = new ImageView("resources/Ninja/Idle/0000.png");
+        npc2.setLayoutX(450);
+        npc2.setLayoutY(300);
+        npc2.setFitWidth(160);
+        npc2.setFitHeight(200);
+        npc2Hitbox = new Rectangle(npc2.getLayoutX()+35,npc2.getLayoutY()+45,npc2.getFitWidth()-80,npc2.getFitHeight()-65);
+        npc2Hitbox.setStroke(Color.BLACK);
+        npc2Hitbox.setStrokeWidth(3);
+        npc2Hitbox.setFill(Color.TRANSPARENT);
+        npc2Hitbox.setId("objN");
+        npc2XY = new Point2D(npc2.getLayoutX()+35,npc2.getLayoutY()+45);
+
+        object1 = new ImageView("resources/Objects/belt.png");
+        object1.setFitWidth(150);
+        object1.setFitHeight(60);
+        object1.setLayoutX(100);
+        object1.setLayoutY(400);
+        object1Hitbox = new Rectangle(object1.getLayoutX(),object1.getLayoutY()+20,object1.getFitWidth(),object1.getFitHeight()-40);
+        object1Hitbox.setStroke(Color.BLACK);
+        object1Hitbox.setStrokeWidth(3);
+        object1Hitbox.setFill(Color.TRANSPARENT);
+        object1Hitbox.setId("objInventoryBelt");
+        object1XY = new Point2D(object1.getLayoutX(),object1.getLayoutY()+20);
+
+        object2 = new ImageView("resources/Objects/backpack.png");
+        object2.setLayoutX(300);
+        object2.setLayoutY(200);
+        object2.setFitWidth(70);
+        object2.setFitHeight(70);
+        object2Hitbox = new Rectangle(object2.getLayoutX(),object2.getLayoutY(),object2.getFitWidth(),object2.getFitHeight());
+        object2Hitbox.setStroke(Color.BLACK);
+        object2Hitbox.setStrokeWidth(3);
+        object2Hitbox.setFill(Color.TRANSPARENT);
+        object2Hitbox.setId("objInventoryBackpack");
+        object2XY = new Point2D(object2.getLayoutX(),object2.getLayoutY());
 
         root = new Pane();
-        player = new Pane();
-        player.setLayoutY(100);
-        player.setLayoutX(100);
 
         presetKeys.add(KeyCode.W);
         presetKeys.add(KeyCode.A);
         presetKeys.add(KeyCode.S);
         presetKeys.add(KeyCode.D);
-
         pressedKeys.put(KeyCode.W, false);
         pressedKeys.put(KeyCode.A, false);
         pressedKeys.put(KeyCode.S, false);
         pressedKeys.put(KeyCode.D, false);
 
-        idlePose = new ArrayList<>();
         for (int i = 0; i < 8; i++) {
-            ImageView iv = new ImageView("resources/Main_Character/idle/000" + i + ".png");
-            iv.setFitHeight(75);
-            iv.setFitWidth(50);
-            idlePose.add(iv);
+            Image iv = new Image("resources/Main_Character/idle/000" + i + ".png");
+            idlePosePlayer.add(iv);
+            Image iv2 = new Image("resources/Main_Character/walk/000"+i+".png");
+            movingPosePlayer.add(iv2);
+            Image iv3 = new Image("resources/Knight/idle/000"+i+".png");
+            idlePosenpc1.add(iv3);
+            Image iv4 = new Image("resources/Ninja/Idle/000"+i+".png");
+            idlePosenpc2.add(iv4);
         }
+
+        ImageView background1 = new ImageView("resources/Backgrounds/beach.jpg");
+        background1.setFitWidth(800);
+        background1.setFitHeight(600);
+        background1.setLayoutY(0);
+        background1.setLayoutX(0);
+        ImageView background2 = new ImageView("resources/Backgrounds/forest.jpg");
+        background2.setFitWidth(800);
+        background2.setFitHeight(600);
+        background2.setLayoutY(0);
+        background2.setLayoutX(0);
+        ImageView background3 = new ImageView("resources/Backgrounds/grass.jpg");
+        background3.setFitWidth(800);
+        background3.setFitHeight(600);
+        background3.setLayoutY(0);
+        background3.setLayoutX(0);
+        ArrayList<ImageView> backgrounds = new ArrayList<>();
+        backgrounds.add(background1);
+        backgrounds.add(background2);
+        backgrounds.add(background3);
+
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        double screenWidth = screenSize.getWidth();
+        if(screenWidth >1500){
+            movementIncrement = 4;
+        }else{
+            movementIncrement = .5;
+        }
+
+        background = backgrounds.get((int)(Math.random()* backgrounds.size()));
     }
     public static void main(String[] args) {
         launch(args);
@@ -70,25 +171,45 @@ public class Runner extends Application {
         new AnimationTimer(){
             @Override
             public void handle(long now) {
+                for(int k = 0; k<pressedKeys.size(); k++) {
+                    moving = pressedKeys.values().contains(true);
+                }
+                if(moving){
+                    if((currentMovingImage/5)==idlePosePlayer.size()){
+                        currentMovingImage = 0;
+                    }
+                    if(currentMovingImage%5==0){
+                        player.setImage(movingPosePlayer.get(currentMovingImage/5));
+                    }
+                    currentMovingImage++;
+                }else{
+                    if((currentIdleImagePlayer/10)==idlePosePlayer.size()){
+                        currentIdleImagePlayer = 0;
+                    }
+                    if(currentIdleImagePlayer%10==0) {
+                        player.setImage(idlePosePlayer.get(currentIdleImagePlayer / 10));
+                    }
+                    currentIdleImagePlayer++;
+                }
                 for(int i = 0; i<presetKeys.size(); i++){
-                    if(pressedKeys.get(presetKeys.get(i))) {
-                        if (presetKeys.get(i) == KeyCode.W) {
+                    if(pressedKeys.get(presetKeys.get(i))){
+                        if(presetKeys.get(i)==KeyCode.W){
                             moveUp();
                         }
-                        if (presetKeys.get(i) == KeyCode.A) {
+                        if(presetKeys.get(i)==KeyCode.A){
                             moveLeft();
                         }
-                        if (presetKeys.get(i) == KeyCode.S) {
+                        if(presetKeys.get(i)==KeyCode.S){
                             moveDown();
                         }
-                        if (presetKeys.get(i) == KeyCode.D) {
+                        if(presetKeys.get(i)==KeyCode.D){
                             moveRight();
                         }
                     }
                 }
-                if(currentDiolog){
-                    diologTimer++;
-                    if(diologTimer==350){
+                if(activeDialog){
+                    dialogCounter++;
+                    if(dialogCounter==270){
                         for(int i = 0; i<root.getChildren().size(); i++){
                             if(root.getChildren().get(i).getId()!=null){
                                 if(root.getChildren().get(i).getId().contains("dialog")){
@@ -97,41 +218,37 @@ public class Runner extends Application {
                                 }
                             }
                         }
-                        currentDiolog = false;
-                        diologTimer = 0;
+                        dialogCounter = 0;
+                        activeDialog = false;
                     }
                 }
+                if((idleCountNPC/10)==idlePosenpc1.size()){
+                    idleCountNPC = 0;
+                }
+                if(idleCountNPC%10==0){
+                    npc1.setImage(idlePosenpc1.get(idleCountNPC/10));
+                    npc2.setImage(idlePosenpc2.get(idleCountNPC/10));
+                }
+                idleCountNPC++;
             }
         }.start();
     }
     public void start(Stage primaryStage) throws Exception {
         root.getChildren().add(titleScreen());
-        ImageView iv = new ImageView("resources/Main_Character/idle/0000.png");
-        iv.setFitWidth(125);
-        iv.setFitHeight(200);
-        player.getChildren().add(iv);
-        player.setMaxSize(125,200);
-
-        NPC1 = new ImageView("resources/Ninja/Idle/0000.png");
-        NPC1.setFitHeight(200);
-        NPC1.setFitWidth(125);
-        NPC1.setLayoutY(100);
-        NPC1.setLayoutX(500);
-        NPC1.setId("objN");
-
-        NPC2 = new ImageView("resources/Pirate/Idle/0000.png");
-        NPC2.setFitHeight(200);
-        NPC2.setFitWidth(125);
-        NPC2.setLayoutY(400);
-        NPC2.setLayoutX(200);
-        NPC2.setId("objP");
-
-        object1 = new ImageView("resources/Objects/belt.png");
-        object1.setFitHeight(90);
-        object1.setFitWidth(150);
-        object1.setLayoutY(50);
-        object1.setLayoutX(100);
-        object1.setId("objB");
+        player = new ImageView("resources/Main_Character/idle/0000.png");
+        player.setLayoutY(100);
+        player.setLayoutX(100);
+        player.setFitHeight(200);
+        player.setFitWidth(125);
+        player.setSmooth(true);
+        player.setTranslateZ(player.getBoundsInLocal().getWidth()/2);
+        player.setRotationAxis(Rotate.Y_AXIS);
+        player.setRotate(180);
+        player.setId("player");
+        playerHitbox = new Rectangle(player.getLayoutX()+20,player.getLayoutY()+60,player.getFitWidth()-40,player.getFitHeight()-80);
+        playerHitbox.setStroke(Color.BLACK);
+        playerHitbox.setStrokeWidth(3);
+        playerHitbox.setFill(Color.TRANSPARENT);
         timer();
 
         primaryStage.setScene(new Scene(root, 800, 600));
@@ -247,13 +364,20 @@ public class Runner extends Application {
         return miniPane;
     }
     private void initGame() {
+        currentScene = 1;
         root.getChildren().clear();
         root.requestFocus();
+        root.getChildren().add(background);
         root.getChildren().add(player);
-        root.getChildren().add(NPC1);
-        root.getChildren().add(NPC2);
+        root.getChildren().add(playerHitbox);
+        root.getChildren().add(npc1);
+        root.getChildren().add(npc1Hitbox);
+        root.getChildren().add(npc2);
+        root.getChildren().add(npc2Hitbox);
         root.getChildren().add(object1);
-
+        root.getChildren().add(object1Hitbox);
+        root.getChildren().add(object2);
+        root.getChildren().add(object2Hitbox);
         root.setOnKeyPressed(event -> {
             for(int i = 0; i<presetKeys.size(); i++){
                 if(presetKeys.get(i)==event.getCode()){
@@ -261,19 +385,23 @@ public class Runner extends Application {
                 }
             }
             if(event.getCode()==KeyCode.E){
-
-                checkPosition(player.getLayoutX(),player.getLayoutY());
+                checkBounds(player.getLayoutX()+20, player.getLayoutY()+60, playerHitbox.getWidth(), playerHitbox.getHeight());
+            }
+            if (event.getCode() == KeyCode.ESCAPE) {
+                for (int i = 0; i < root.getChildren().size(); i++) {
+                    Node n = root.getChildren().get(i);
+                    n.setEffect(new GaussianBlur());
+                }
+                drawOptionsMenu();
             }
         });
         root.setOnKeyReleased(event -> {
             Set<KeyCode> keys = pressedKeys.keySet();
             for(int k = 0; k<pressedKeys.size(); k++) {
                 if(pressedKeys.values().contains(true)) {
-                    for (int i = 0; i < presetKeys.size(); i++) {
-                        for (int f = 0; f < keys.size(); f++) {
-                            if (keys.contains(presetKeys.get(i))) {
-                                pressedKeys.replace(presetKeys.get(i), false);
-                            }
+                    for (int f = 0; f < keys.size(); f++) {
+                        if (keys.contains(event.getCode())) {
+                            pressedKeys.replace(event.getCode(), false);
                         }
                     }
                 }
@@ -281,17 +409,106 @@ public class Runner extends Application {
         });
 
     }
+    private void checkBounds(double x1, double y1, double width1, double height1){
+        int x = (int)x1;
+        int y = (int)y1;
+        int width = (int)width1;
+        int height = (int)height1;
+
+        for(int i = 0; i<root.getChildren().size(); i++){
+            if(root.getChildren().get(i).getId()!=null){
+                if(root.getChildren().get(i).getId().contains("obj")){
+                    Rectangle r = (Rectangle) root.getChildren().get(i);
+
+                    switch (root.getChildren().get(i).getId()) {
+                        case "objK":
+                            if (((x > npc1XY.getX() && x < npc1XY.getX() + r.getWidth()) || (x + width > npc1XY.getX() && x + width < npc1XY.getX() + r.getWidth())) &&
+                                    ((y > npc1XY.getY() && y < npc1XY.getY() + r.getHeight()) || (y + height > npc1XY.getY() && y + height < npc1XY.getY() + r.getHeight()))) {
+                                System.out.println("test");
+                                initDialog("Knight");
+                            }
+                            break;
+                        case "objN":
+                            if (((x > npc2XY.getX() && x < npc2XY.getX() + r.getWidth()) || (x + width > npc2XY.getX() && x + width < npc2XY.getX() + r.getWidth())) &&
+                                    ((y > npc2XY.getY() && y < npc2XY.getY() + r.getHeight()) || (y + height > npc2XY.getY() && y + height < npc2XY.getY() + r.getHeight()))) {
+                                System.out.println("test");
+                                initDialog("Ninja");
+                            }
+                            break;
+                        case "objInventoryBelt":
+                            if (((x > object1XY.getX() && x < object1XY.getX() + r.getWidth()) || (x + width > object1XY.getX() && x + width < object1XY.getX() + r.getWidth())) &&
+                                    ((y > object1XY.getY() && y < object1XY.getY() + r.getHeight()) || (y + height > object1XY.getY() && y + height < object1XY.getY() + r.getHeight()))) {
+                                System.out.println("test");
+                                initDialog("ObjectBelt");
+                            }
+                            break;
+                        case "objInventoryBackpack":
+                            if (((x > object2XY.getX() && x < object2XY.getX() + r.getWidth()) || (x + width > object2XY.getX() && x + width < object2XY.getX() + r.getWidth())) &&
+                                    ((y > object2XY.getY() && y < object2XY.getY() + r.getHeight()) || (y + height > object2XY.getY() && y + height < object2XY.getY() + r.getHeight()))) {
+                                System.out.println("test");
+                                initDialog("ObjectBackpack");
+                            }
+                            break;
+                    }
+
+                }
+            }
+        }
+    }
+    private void initDialog(String player){
+        activeDialog = true;
+        Rectangle r = new Rectangle(0,500,800,100);
+        r.setFill(Color.WHITE);
+        r.setStroke(Color.BLACK);
+        r.setStrokeWidth(3);
+        r.setId("dialog");
+        root.getChildren().add(r);
+        if(currentDialog==0){
+            Text t = new Text("Ninja:\nHey could you get me my gucci belt");
+            t.setLayoutX(15);
+            t.setLayoutY(530);
+            t.setFont(new Font(28));
+            t.setWrappingWidth(760);
+            t.setId("dialog");
+            root.getChildren().add(t);
+            currentDialog++;
+        }else if(currentDialog==1){
+            Text t = new Text("Player:\nAyy we copped that new grucci");
+            t.setLayoutX(15);
+            t.setLayoutY(530);
+            t.setFont(new Font(28));
+            t.setWrappingWidth(760);
+            t.setId("dialog");
+            root.getChildren().add(t);
+            currentDialog++;
+        }else if(currentDialog==2){
+            Text t = new Text("Pirate:\nThanks Mane");
+            t.setLayoutX(15);
+            t.setLayoutY(530);
+            t.setFont(new Font(28));
+            t.setWrappingWidth(760);
+            t.setId("dialog");
+            root.getChildren().add(t);
+            currentDialog++;
+        }
+    }
     private void moveUp(){
-        player.setLayoutY(player.getLayoutY()-1);
+        player.setLayoutY(player.getLayoutY()-movementIncrement);
+        playerHitbox.setLayoutY(playerHitbox.getLayoutY()-movementIncrement);
     }
     private void moveLeft(){
-        player.setLayoutX(player.getLayoutX()-1);
-    }
-    private void moveRight(){
-        player.setLayoutX(player.getLayoutX()+1);
+        player.setLayoutX(player.getLayoutX()-4);
+        playerHitbox.setLayoutX(playerHitbox.getLayoutX()-movementIncrement);
+        player.setRotate(0);
     }
     private void moveDown(){
-        player.setLayoutY(player.getLayoutY()+1);
+        player.setLayoutY(player.getLayoutY()+movementIncrement);
+        playerHitbox.setLayoutY(playerHitbox.getLayoutY()+movementIncrement);
+    }
+    private void moveRight(){
+        player.setLayoutX(player.getLayoutX()+movementIncrement);
+        playerHitbox.setLayoutX(playerHitbox.getLayoutX()+movementIncrement);
+        player.setRotate(180);
     }
     private void drawOptionsMenu() {
         Pane miniPane = new Pane();
@@ -342,91 +559,21 @@ public class Runner extends Application {
         miniPane.getChildren().add(exit);
 
         //figure out how to make this work
-        root.setFocusTraversable(true);
         root.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ESCAPE) {
-                root.getChildren().clear();
                 root.getChildren().remove(miniPane);
-                root.getChildren().add(titleScreen());
+                if(currentScene==0) {
+                    root.getChildren().add(titleScreen());
+                }else{
+                    for(int i = 0; i<root.getChildren().size(); i++){
+                        Node n = root.getChildren().get(i);
+                        n.setEffect(null);
+                    }
+                    initGame();
+                }
             }
         });
 
         root.getChildren().add(miniPane);
-    }
-    private void checkPosition(double x, double y){
-        for(int i = 0; i<root.getChildren().size(); i++){
-            if(root.getChildren().get(i).getId()!=null){
-                if(root.getChildren().get(i).getId().contains("obj")){
-                    Rectangle r1 = new Rectangle(root.getChildren().get(i).getLayoutX(),root.getChildren().get(i).getLayoutY(), 125,200);
-                    root.getChildren().add(r1);
-                    //System.out.println(root.getChildren().get(i).getId().contains("N"));
-                    System.out.println(r1.intersects(x,y,1,1));
-//                    System.out.println(r1.contains(115,515));
-                    if(r1.contains(x,y)){
-                        System.out.println("test");
-                        if(root.getChildren().get(i).getId().contains("N")){
-                            initDiolauge(currentStep,"Ninja");
-                        }
-                    }
-                }
-            }
-        }
-        if(NPC1.contains(x,y)){
-            initDiolauge(currentStep, "Ninja");
-        }
-        if(NPC2.contains(x,y)){
-            initDiolauge(currentStep, "Pirate");
-        }
-        if(object1.contains(x,y)){
-            collectItem("Belt");
-        }
-    }
-    private void initDiolauge(int step, String character){
-        currentDiolog = true;
-        Rectangle r = new Rectangle(0,500,800,100);
-        r.setId("dialog");
-        r.setStrokeWidth(5);
-        r.setStroke(Color.BLACK);
-        r.setFill(Color.WHITE);
-        root.getChildren().add(r);
-        if(step==-1&&character.equals("item")){
-            int selector = (int) (Math.random()*(3));
-            Text t = new Text();
-            t.setId("dialog");
-            if(selector==0){
-                t.setText("Player:\nNice we copped that new grucci");
-            }
-            if(selector==1){
-                t.setText("Player:\nHellllllo epic department");
-            }
-            if(selector==2){
-                t.setText("Player:\nWe got that new supreme drop");
-            }
-            t.setFont(new Font(28));
-            t.setLayoutY(535);
-            t.setLayoutX(20);
-            t.setWrappingWidth(760);
-            root.getChildren().add(t);
-        }else if(step==0&&character.equals("Ninja")){
-            Text t = new Text("Ninja:\nBruh do you got that grucci belt?");
-            t.setId("dialog");
-            t.setFont(new Font(28));
-            t.setLayoutY(535);
-            t.setLayoutX(20);
-            t.setWrappingWidth(760);
-            root.getChildren().add(t);
-        }else if(step==0&&character.equals("Pirate")){
-            Text t = new Text("Pirate:\nAyo yall got my gucci belt");
-            t.setId("dialog");
-            t.setFont(new Font(28));
-            t.setLayoutY(535);
-            t.setLayoutX(20);
-            t.setWrappingWidth(760);
-            root.getChildren().add(t);
-        }
-    }
-    private void collectItem(String item){
-        inventory.add(item);
-        initDiolauge(-1,"item");
     }
 }

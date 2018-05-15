@@ -3,6 +3,7 @@ import javafx.application.Application;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -14,6 +15,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
@@ -29,30 +31,28 @@ public class Runner extends Application {
     private HashMap<KeyCode, Boolean> pressedKeys = new HashMap<>();
     private ArrayList<String> idList = new ArrayList<>();
     private ArrayList<KeyCode> presetKeys = new ArrayList<>();
-    private ArrayList<String> inventory = new ArrayList<>();
     private ArrayList<Image> idlePosePlayer = new ArrayList<>();
     private ArrayList<Image> movingPosePlayer = new ArrayList<>();
     private ArrayList<Image> runningPosePlayer = new ArrayList<>();
-    private ArrayList<Image> idlePosenpc1 = new ArrayList<>();
-    private ArrayList<Image> idlePosenpc2 = new ArrayList<>();
-    private ObservableList<InventoryData> data = FXCollections.observableArrayList();
-    private TableView<InventoryData> table = new TableView<>();
+    private ArrayList<Image> idlePoseknight = new ArrayList<>();
+    private ArrayList<Image> idlePoseninja = new ArrayList<>();
+    private ObservableList<InventoryData> inventory = FXCollections.observableArrayList();
     private Pane root;
     private ImageView background;
     private ImageView player;
-    private ImageView npc1;
-    private ImageView npc2;
-    private ImageView object1;
-    private ImageView object2;
+    private ImageView knight;
+    private ImageView ninja;
+    private ImageView belt;
+    private ImageView backpack;
     private Rectangle playerHitbox;
-    private Rectangle npc1Hitbox;
-    private Rectangle npc2Hitbox;
-    private Rectangle object1Hitbox;
-    private Rectangle object2Hitbox;
-    private Point2D npc1XY;
-    private Point2D npc2XY;
-    private Point2D object1XY;
-    private Point2D object2XY;
+    private Rectangle knightHitbox;
+    private Rectangle ninjaHitbox;
+    private Rectangle beltHitbox;
+    private Rectangle backpackHitbox;
+    private Point2D knightXY;
+    private Point2D ninjaXY;
+    private Point2D beltXY;
+    private Point2D backpackXY;
     private int cloutCount;
     private int currentDialog;
     private int dialogCounter = 0;
@@ -66,57 +66,58 @@ public class Runner extends Application {
     private boolean running = false;
     private boolean activeDialog;
     private boolean containsBackpack;
+    private boolean openInventory;
 
     public Runner() {
         currentDialog = -2;
 
-        npc1 = new ImageView("resources/Knight/idle/0000.png");
-        npc1.setLayoutX(500);
-        npc1.setLayoutY(100);
-        npc1.setFitWidth(125);
-        npc1.setFitHeight(200);
-        npc1Hitbox = new Rectangle(npc1.getLayoutX()+25,npc1.getLayoutY()+45,npc1.getFitWidth()-30,npc1.getFitHeight()-55);
-        npc1Hitbox.setStroke(Color.BLACK);
-        npc1Hitbox.setStrokeWidth(3);
-        npc1Hitbox.setFill(Color.TRANSPARENT);
-        npc1Hitbox.setId("objK");
-        npc1XY = new Point2D(npc1.getLayoutX()+25,npc1.getLayoutY()+45);
+        knight = new ImageView("resources/Knight/idle/0000.png");
+        knight.setLayoutX(500);
+        knight.setLayoutY(100);
+        knight.setFitWidth(125);
+        knight.setFitHeight(200);
+        knightHitbox = new Rectangle(knight.getLayoutX()+25,knight.getLayoutY()+45,knight.getFitWidth()-30,knight.getFitHeight()-55);
+        knightHitbox.setStroke(Color.BLACK);
+        knightHitbox.setStrokeWidth(3);
+        knightHitbox.setFill(Color.TRANSPARENT);
+        knightHitbox.setId("objK");
+        knightXY = new Point2D(knight.getLayoutX()+25,knight.getLayoutY()+45);
 
-        npc2 = new ImageView("resources/Ninja/Idle/0000.png");
-        npc2.setLayoutX(450);
-        npc2.setLayoutY(300);
-        npc2.setFitWidth(160);
-        npc2.setFitHeight(200);
-        npc2Hitbox = new Rectangle(npc2.getLayoutX()+35,npc2.getLayoutY()+45,npc2.getFitWidth()-80,npc2.getFitHeight()-65);
-        npc2Hitbox.setStroke(Color.BLACK);
-        npc2Hitbox.setStrokeWidth(3);
-        npc2Hitbox.setFill(Color.TRANSPARENT);
-        npc2Hitbox.setId("objN");
-        npc2XY = new Point2D(npc2.getLayoutX()+35,npc2.getLayoutY()+45);
+        ninja = new ImageView("resources/Ninja/Idle/0000.png");
+        ninja.setLayoutX(450);
+        ninja.setLayoutY(300);
+        ninja.setFitWidth(160);
+        ninja.setFitHeight(200);
+        ninjaHitbox = new Rectangle(ninja.getLayoutX()+35,ninja.getLayoutY()+45,ninja.getFitWidth()-80,ninja.getFitHeight()-65);
+        ninjaHitbox.setStroke(Color.BLACK);
+        ninjaHitbox.setStrokeWidth(3);
+        ninjaHitbox.setFill(Color.TRANSPARENT);
+        ninjaHitbox.setId("objN");
+        ninjaXY = new Point2D(ninja.getLayoutX()+35,ninja.getLayoutY()+45);
 
-        object1 = new ImageView("resources/Objects/belt.png");
-        object1.setFitWidth(150);
-        object1.setFitHeight(60);
-        object1.setLayoutX(100);
-        object1.setLayoutY(400);
-        object1Hitbox = new Rectangle(object1.getLayoutX(),object1.getLayoutY()+20,object1.getFitWidth(),object1.getFitHeight()-40);
-        object1Hitbox.setStroke(Color.BLACK);
-        object1Hitbox.setStrokeWidth(3);
-        object1Hitbox.setFill(Color.TRANSPARENT);
-        object1Hitbox.setId("objInventoryBelt");
-        object1XY = new Point2D(object1.getLayoutX(),object1.getLayoutY()+20);
+        belt = new ImageView("resources/Objects/belt.png");
+        belt.setFitWidth(150);
+        belt.setFitHeight(60);
+        belt.setLayoutX(100);
+        belt.setLayoutY(400);
+        beltHitbox = new Rectangle(belt.getLayoutX(),belt.getLayoutY()+20,belt.getFitWidth(),belt.getFitHeight()-40);
+        beltHitbox.setStroke(Color.BLACK);
+        beltHitbox.setStrokeWidth(3);
+        beltHitbox.setFill(Color.TRANSPARENT);
+        beltHitbox.setId("objInventoryBelt");
+        beltXY = new Point2D(belt.getLayoutX(),belt.getLayoutY()+20);
 
-        object2 = new ImageView("resources/Objects/backpack.png");
-        object2.setLayoutX(300);
-        object2.setLayoutY(200);
-        object2.setFitWidth(70);
-        object2.setFitHeight(70);
-        object2Hitbox = new Rectangle(object2.getLayoutX(),object2.getLayoutY(),object2.getFitWidth(),object2.getFitHeight());
-        object2Hitbox.setStroke(Color.BLACK);
-        object2Hitbox.setStrokeWidth(3);
-        object2Hitbox.setFill(Color.TRANSPARENT);
-        object2Hitbox.setId("objInventoryBackpack");
-        object2XY = new Point2D(object2.getLayoutX(),object2.getLayoutY());
+        backpack = new ImageView("resources/Objects/backpack.png");
+        backpack.setLayoutX(300);
+        backpack.setLayoutY(200);
+        backpack.setFitWidth(70);
+        backpack.setFitHeight(70);
+        backpackHitbox = new Rectangle(backpack.getLayoutX(),backpack.getLayoutY(),backpack.getFitWidth(),backpack.getFitHeight());
+        backpackHitbox.setStroke(Color.BLACK);
+        backpackHitbox.setStrokeWidth(3);
+        backpackHitbox.setFill(Color.TRANSPARENT);
+        backpackHitbox.setId("objInventoryBackpack");
+        backpackXY = new Point2D(backpack.getLayoutX(),backpack.getLayoutY());
 
         root = new Pane();
 
@@ -124,6 +125,7 @@ public class Runner extends Application {
         presetKeys.add(KeyCode.A);
         presetKeys.add(KeyCode.S);
         presetKeys.add(KeyCode.D);
+        presetKeys.add(KeyCode.I);
         pressedKeys.put(KeyCode.W, false);
         pressedKeys.put(KeyCode.A, false);
         pressedKeys.put(KeyCode.S, false);
@@ -135,9 +137,9 @@ public class Runner extends Application {
             Image iv2 = new Image("resources/Main_Character/walk/000"+i+".png");
             movingPosePlayer.add(iv2);
             Image iv3 = new Image("resources/Knight/idle/000"+i+".png");
-            idlePosenpc1.add(iv3);
+            idlePoseknight.add(iv3);
             Image iv4 = new Image("resources/Ninja/Idle/000"+i+".png");
-            idlePosenpc2.add(iv4);
+            idlePoseninja.add(iv4);
         }
 
         ImageView background1 = new ImageView("resources/Backgrounds/beach.jpg");
@@ -199,18 +201,20 @@ public class Runner extends Application {
                     currentIdleImagePlayer++;
                 }
                 for(int i = 0; i<presetKeys.size(); i++){
-                    if(pressedKeys.get(presetKeys.get(i))){
-                        if(presetKeys.get(i)==KeyCode.W){
-                            moveUp();
-                        }
-                        if(presetKeys.get(i)==KeyCode.A){
-                            moveLeft();
-                        }
-                        if(presetKeys.get(i)==KeyCode.S){
-                            moveDown();
-                        }
-                        if(presetKeys.get(i)==KeyCode.D){
-                            moveRight();
+                    if(presetKeys.get(i)!=KeyCode.I) {
+                        if (pressedKeys.get(presetKeys.get(i))) {
+                            if (presetKeys.get(i) == KeyCode.W) {
+                                moveUp();
+                            }
+                            if (presetKeys.get(i) == KeyCode.A) {
+                                moveLeft();
+                            }
+                            if (presetKeys.get(i) == KeyCode.S) {
+                                moveDown();
+                            }
+                            if (presetKeys.get(i) == KeyCode.D) {
+                                moveRight();
+                            }
                         }
                     }
                 }
@@ -232,12 +236,12 @@ public class Runner extends Application {
                         }
                     }
                 }
-                if((idleCountNPC/10)==idlePosenpc1.size()){
+                if((idleCountNPC/10)==idlePoseknight.size()){
                     idleCountNPC = 0;
                 }
                 if(idleCountNPC%10==0){
-                    npc1.setImage(idlePosenpc1.get(idleCountNPC/10));
-                    npc2.setImage(idlePosenpc2.get(idleCountNPC/10));
+                    knight.setImage(idlePoseknight.get(idleCountNPC/10));
+                    ninja.setImage(idlePoseninja.get(idleCountNPC/10));
                 }
                 idleCountNPC++;
             }
@@ -382,39 +386,42 @@ public class Runner extends Application {
         root.getChildren().add(background);
         root.getChildren().add(player);
         root.getChildren().add(playerHitbox);
-        root.getChildren().add(npc1);
-        root.getChildren().add(npc1Hitbox);
-        root.getChildren().add(npc2);
-        root.getChildren().add(npc2Hitbox);
-        root.getChildren().add(object1);
-        root.getChildren().add(object1Hitbox);
-        root.getChildren().add(object2);
-        root.getChildren().add(object2Hitbox);
+        root.getChildren().add(knight);
+        root.getChildren().add(knightHitbox);
+        root.getChildren().add(ninja);
+        root.getChildren().add(ninjaHitbox);
+        root.getChildren().add(belt);
+        root.getChildren().add(beltHitbox);
+        root.getChildren().add(backpack);
+        root.getChildren().add(backpackHitbox);
         if(currentDialog==-2) {
             initDialog(null);
         }
         root.setOnKeyPressed(event -> {
-            for(int i = 0; i<presetKeys.size(); i++){
-                if(presetKeys.get(i)==event.getCode()){
-                    pressedKeys.replace(presetKeys.get(i), true);
+            if(!openInventory) {
+                for (int i = 0; i < presetKeys.size(); i++) {
+                    if (presetKeys.get(i) == event.getCode()) {
+                        pressedKeys.replace(presetKeys.get(i), true);
+                    }
                 }
-            }
-            if(event.getCode()==KeyCode.E){
-                checkBounds(player.getLayoutX()+20, player.getLayoutY()+60, playerHitbox.getWidth(), playerHitbox.getHeight());
-            }
-            if (event.getCode() == KeyCode.ESCAPE) {
-                for (int i = 0; i < root.getChildren().size(); i++) {
-                    Node n = root.getChildren().get(i);
-                    n.setEffect(new GaussianBlur());
+                if (event.getCode() == KeyCode.E) {
+                    checkBounds(player.getLayoutX() + 20, player.getLayoutY() + 60, playerHitbox.getWidth(), playerHitbox.getHeight());
                 }
-                drawOptionsMenu();
-            }
-            if(event.getCode()==KeyCode.TAB){
-                for (int i = 0; i < root.getChildren().size(); i++) {
-                    Node n = root.getChildren().get(i);
-                    n.setEffect(new GaussianBlur());
+                if (event.getCode() == KeyCode.ESCAPE) {
+                    for (int i = 0; i < root.getChildren().size(); i++) {
+                        Node n = root.getChildren().get(i);
+                        n.setEffect(new GaussianBlur());
+                    }
+                    drawOptionsMenu();
                 }
-                drawInventory();
+                if (event.getCode() == KeyCode.I) {
+                    openInventory = true;
+                    for (int i = 0; i < root.getChildren().size(); i++) {
+                        Node n = root.getChildren().get(i);
+                        n.setEffect(new GaussianBlur());
+                    }
+                    drawInventory();
+                }
             }
         });
         root.setOnKeyReleased(event -> {
@@ -444,26 +451,26 @@ public class Runner extends Application {
 
                     switch (root.getChildren().get(i).getId()) {
                         case "objK":
-                            if (((x > npc1XY.getX() && x < npc1XY.getX() + r.getWidth()) || (x + width > npc1XY.getX() && x + width < npc1XY.getX() + r.getWidth())) &&
-                                    ((y > npc1XY.getY() && y < npc1XY.getY() + r.getHeight()) || (y + height > npc1XY.getY() && y + height < npc1XY.getY() + r.getHeight()))) {
+                            if (((x > knightXY.getX() && x < knightXY.getX() + r.getWidth()) || (x + width > knightXY.getX() && x + width < knightXY.getX() + r.getWidth())) &&
+                                    ((y > knightXY.getY() && y < knightXY.getY() + r.getHeight()) || (y + height > knightXY.getY() && y + height < knightXY.getY() + r.getHeight()))) {
                                 initDialog("Knight");
                             }
                             break;
                         case "objN":
-                            if (((x > npc2XY.getX() && x < npc2XY.getX() + r.getWidth()) || (x + width > npc2XY.getX() && x + width < npc2XY.getX() + r.getWidth())) &&
-                                    ((y > npc2XY.getY() && y < npc2XY.getY() + r.getHeight()) || (y + height > npc2XY.getY() && y + height < npc2XY.getY() + r.getHeight()))) {
+                            if (((x > ninjaXY.getX() && x < ninjaXY.getX() + r.getWidth()) || (x + width > ninjaXY.getX() && x + width < ninjaXY.getX() + r.getWidth())) &&
+                                    ((y > ninjaXY.getY() && y < ninjaXY.getY() + r.getHeight()) || (y + height > ninjaXY.getY() && y + height < ninjaXY.getY() + r.getHeight()))) {
                                 initDialog("Ninja");
                             }
                             break;
                         case "objInventoryBelt":
-                            if (((x > object1XY.getX() && x < object1XY.getX() + r.getWidth()) || (x + width > object1XY.getX() && x + width < object1XY.getX() + r.getWidth())) &&
-                                    ((y > object1XY.getY() && y < object1XY.getY() + r.getHeight()) || (y + height > object1XY.getY() && y + height < object1XY.getY() + r.getHeight()))) {
+                            if (((x > beltXY.getX() && x < beltXY.getX() + r.getWidth()) || (x + width > beltXY.getX() && x + width < beltXY.getX() + r.getWidth())) &&
+                                    ((y > beltXY.getY() && y < beltXY.getY() + r.getHeight()) || (y + height > beltXY.getY() && y + height < beltXY.getY() + r.getHeight()))) {
                                 initDialog("Belt");
                             }
                             break;
                         case "objInventoryBackpack":
-                            if (((x > object2XY.getX() && x < object2XY.getX() + r.getWidth()) || (x + width > object2XY.getX() && x + width < object2XY.getX() + r.getWidth())) &&
-                                    ((y > object2XY.getY() && y < object2XY.getY() + r.getHeight()) || (y + height > object2XY.getY() && y + height < object2XY.getY() + r.getHeight()))) {
+                            if (((x > backpackXY.getX() && x < backpackXY.getX() + r.getWidth()) || (x + width > backpackXY.getX() && x + width < backpackXY.getX() + r.getWidth())) &&
+                                    ((y > backpackXY.getY() && y < backpackXY.getY() + r.getHeight()) || (y + height > backpackXY.getY() && y + height < backpackXY.getY() + r.getHeight()))) {
                                 initDialog("Backpack");
                             }
                             break;
@@ -502,7 +509,7 @@ public class Runner extends Application {
             currentDialog++;
         }
         else if(currentDialog==-1&&player==null){
-            Text t = new Text("Player:\nPress TAB to open inventory");
+            Text t = new Text("Player:\nPress "+presetKeys.get(presetKeys.size()-1)+" to open inventory");
             t.setLayoutX(15);
             t.setLayoutY(530);
             t.setFont(new Font(28));
@@ -546,7 +553,7 @@ public class Runner extends Application {
             t.setFont(new Font(28));
             t.setWrappingWidth(760);
             t.setId("dialog");
-            inventory.add("Belt");
+            inventory.add(new InventoryData(formatImage(new ImageView("resources/Objects/belt.png")),"Belt"));
             root.getChildren().add(t);
         }
         else if(player.equals("Backpack")){
@@ -650,7 +657,7 @@ public class Runner extends Application {
         miniPane.setLayoutX(200);
         miniPane.setLayoutY(50);
 
-        Rectangle r = new Rectangle(300, 400);
+        Rectangle r = new Rectangle(350, 450);
         r.setStrokeWidth(3);
         r.setStroke(Color.BLACK);
         r.setFill(Color.WHITE);
@@ -662,40 +669,71 @@ public class Runner extends Application {
         t1.setLayoutX(75);
         miniPane.getChildren().add(t1);
 
+        TableColumn tc1 = new TableColumn<>("Picture");
+        tc1.setCellValueFactory(new PropertyValueFactory<InventoryData, ImageView>("image"));
+        tc1.setMinWidth(70);
+
+        TableColumn tc2 = new TableColumn<>("Text");
+        tc2.setCellValueFactory(new PropertyValueFactory<InventoryData, String>("itemName"));
+        tc2.setMinWidth(60);
+
+        TableView<InventoryData> table = new TableView<>();
+        table.setEditable(false);
+        table.getColumns().addAll(tc1,tc2);
+        table.setItems(inventory);
+
+        table.setMaxSize(320,300);
+
+        final VBox vbox = new VBox();
+        vbox.setId("tablebox");
+        vbox.setSpacing(5);
+        vbox.setPadding(new Insets(10, 0, 0, 10));
+        vbox.getChildren().addAll(table);
+        vbox.setLayoutX(15);
+        vbox.setLayoutY(100);
+
+        miniPane.getChildren().add(vbox);
+
+
         root.requestFocus();
         root.setOnKeyPressed(event -> {
-            root.getChildren().remove(miniPane);
-            if(event.getCode()==KeyCode.TAB){
+            if(event.getCode()==KeyCode.I){
+                root.getChildren().remove(miniPane);
                 for(int i = 0; i<root.getChildren().size(); i++){
                     Node n = root.getChildren().get(i);
                     n.setEffect(null);
                 }
+                openInventory = false;
                 initGame();
             }
         });
 
-        table.setEditable(true);
-
-        data.add(new InventoryData(player));
-
-        TableColumn<InventoryData, ImageView> firstColumn = new TableColumn<>("Images");
-        firstColumn.setCellValueFactory(new PropertyValueFactory<InventoryData, ImageView>("iv"));
-
-        table.getColumns().add(firstColumn);
-        table.setItems(data);
-        miniPane.getChildren().add(table);
         root.getChildren().add(miniPane);
     }
     public static class InventoryData{
-        private final ImageView iv;
-        private InventoryData(ImageView i){
-            iv = i;
+        private ImageView image;
+        private String itemName;
+        private InventoryData(ImageView i, String s){
+            image = i;
+            itemName = s;
         }
         public void setImage(Image i){
-            iv.setImage(i);
+            image.setImage(i);
         }
         public ImageView getImage(){
-            return iv;
+            return image;
         }
+        public void setItemName(String s){
+            itemName = s;
+        }
+        public String getItemName(){
+            return itemName;
+        }
+    }
+    public ImageView formatImage(ImageView image){
+        image.setFitHeight(70);
+        image.setFitWidth(70);
+        image.setEffect(null);
+        return image;
     }
 }

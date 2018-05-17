@@ -1,14 +1,15 @@
+import com.sun.istack.internal.NotNull;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
 import javafx.scene.control.*;
+import javafx.scene.control.Label;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
@@ -23,12 +24,15 @@ import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 
-import java.awt.Dimension;
-import java.awt.Toolkit;
-import java.util.*;
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 public class Runner extends Application {
     private HashMap<KeyCode, Boolean> pressedKeys = new HashMap<>();
+    private HashMap<Quest, Boolean> currentQuests = new HashMap<>();
     private ArrayList<String> idList = new ArrayList<>();
     private ArrayList<KeyCode> presetKeys = new ArrayList<>();
     private ArrayList<Image> idlePosePlayer = new ArrayList<>();
@@ -36,8 +40,10 @@ public class Runner extends Application {
     private ArrayList<Image> runningPosePlayer = new ArrayList<>();
     private ArrayList<Image> idlePoseknight = new ArrayList<>();
     private ArrayList<Image> idlePoseninja = new ArrayList<>();
+    private ArrayList<String> leavingCharacters = new ArrayList<>();
     private ObservableList<InventoryData> inventory = FXCollections.observableArrayList();
     private Pane root;
+    private Quest currentQuest = new Quest();
     private ImageView background;
     private ImageView player;
     private ImageView knight;
@@ -61,12 +67,18 @@ public class Runner extends Application {
     private int currentMovingDecrement = 5;
     private int idleCountNPC;
     private int currentScene;
+    private double moneyCount;
     private double movementIncrement;
     private boolean moving = false;
     private boolean running = false;
     private boolean activeDialog;
     private boolean containsBackpack;
     private boolean openInventory;
+    private boolean activeQuest;
+    private String questFor;
+
+    //make it so you cant get money if you dont have wallet, but dont have wallet images rn
+    private boolean containsWallet;
 
     public Runner() {
         currentDialog = -2;
@@ -76,8 +88,11 @@ public class Runner extends Application {
         knight.setLayoutY(100);
         knight.setFitWidth(125);
         knight.setFitHeight(200);
+        knight.setTranslateZ(knight.getBoundsInLocal().getWidth()/2);
+        knight.setRotationAxis(Rotate.Y_AXIS);
+        knight.setRotate(0);
         knightHitbox = new Rectangle(knight.getLayoutX()+25,knight.getLayoutY()+45,knight.getFitWidth()-30,knight.getFitHeight()-55);
-        knightHitbox.setStroke(Color.BLACK);
+        knightHitbox.setStroke(Color.TRANSPARENT);
         knightHitbox.setStrokeWidth(3);
         knightHitbox.setFill(Color.TRANSPARENT);
         knightHitbox.setId("objK");
@@ -88,8 +103,11 @@ public class Runner extends Application {
         ninja.setLayoutY(300);
         ninja.setFitWidth(160);
         ninja.setFitHeight(200);
+        ninja.setTranslateZ(ninja.getBoundsInLocal().getWidth()/2);
+        ninja.setRotationAxis(Rotate.Y_AXIS);
+        ninja.setRotate(0);
         ninjaHitbox = new Rectangle(ninja.getLayoutX()+35,ninja.getLayoutY()+45,ninja.getFitWidth()-80,ninja.getFitHeight()-65);
-        ninjaHitbox.setStroke(Color.BLACK);
+        ninjaHitbox.setStroke(Color.TRANSPARENT);
         ninjaHitbox.setStrokeWidth(3);
         ninjaHitbox.setFill(Color.TRANSPARENT);
         ninjaHitbox.setId("objN");
@@ -100,8 +118,9 @@ public class Runner extends Application {
         belt.setFitHeight(60);
         belt.setLayoutX(100);
         belt.setLayoutY(400);
+        belt.setId("obBelt");
         beltHitbox = new Rectangle(belt.getLayoutX(),belt.getLayoutY()+20,belt.getFitWidth(),belt.getFitHeight()-40);
-        beltHitbox.setStroke(Color.BLACK);
+        beltHitbox.setStroke(Color.TRANSPARENT);
         beltHitbox.setStrokeWidth(3);
         beltHitbox.setFill(Color.TRANSPARENT);
         beltHitbox.setId("objInventoryBelt");
@@ -112,8 +131,9 @@ public class Runner extends Application {
         backpack.setLayoutY(200);
         backpack.setFitWidth(70);
         backpack.setFitHeight(70);
+        backpack.setId("obBackpack");
         backpackHitbox = new Rectangle(backpack.getLayoutX(),backpack.getLayoutY(),backpack.getFitWidth(),backpack.getFitHeight());
-        backpackHitbox.setStroke(Color.BLACK);
+        backpackHitbox.setStroke(Color.TRANSPARENT);
         backpackHitbox.setStrokeWidth(3);
         backpackHitbox.setFill(Color.TRANSPARENT);
         backpackHitbox.setId("objInventoryBackpack");
@@ -244,6 +264,28 @@ public class Runner extends Application {
                     ninja.setImage(idlePoseninja.get(idleCountNPC/10));
                 }
                 idleCountNPC++;
+                if(currentQuests.size()>0){
+                    List<Quest> list = new ArrayList<>(currentQuests.keySet());
+                    Quest q = list.get(0);
+                    if(q.questComplete()){
+                        currentQuests.replace(currentQuest, true);
+                    }
+                    List<String> reqs = q.getReqs();
+                    for(int i = 0; i<reqs.size(); i++){
+                        drawReqs(reqs.get(i), q.getReqAtPos(i));
+                    }
+                }
+                if(leavingCharacters.size()>0){
+                    for(int i = 0; i<leavingCharacters.size(); i++){
+                        if(leavingCharacters.get(i).equals("Ninja")){
+                            if(ninja.getLayoutX()<850) {
+                                moveOffScreen("Ninja");
+                            }
+                        }else if(leavingCharacters.get(i).equals("Knight")){
+                            moveOffScreen("Knight");
+                        }
+                    }
+                }
             }
         }.start();
     }
@@ -390,10 +432,14 @@ public class Runner extends Application {
         root.getChildren().add(knightHitbox);
         root.getChildren().add(ninja);
         root.getChildren().add(ninjaHitbox);
-        root.getChildren().add(belt);
-        root.getChildren().add(beltHitbox);
-        root.getChildren().add(backpack);
-        root.getChildren().add(backpackHitbox);
+        if(currentDialog<3) {
+            root.getChildren().add(belt);
+            root.getChildren().add(beltHitbox);
+        }
+        if(currentDialog<2) {
+            root.getChildren().add(backpack);
+            root.getChildren().add(backpackHitbox);
+        }
         if(currentDialog==-2) {
             initDialog(null);
         }
@@ -436,7 +482,6 @@ public class Runner extends Application {
                 }
             }
         });
-
     }
     private void checkBounds(double x1, double y1, double width1, double height1){
         int x = (int)x1;
@@ -448,7 +493,6 @@ public class Runner extends Application {
             if(root.getChildren().get(i).getId()!=null){
                 if(root.getChildren().get(i).getId().contains("obj")){
                     Rectangle r = (Rectangle) root.getChildren().get(i);
-
                     switch (root.getChildren().get(i).getId()) {
                         case "objK":
                             if (((x > knightXY.getX() && x < knightXY.getX() + r.getWidth()) || (x + width > knightXY.getX() && x + width < knightXY.getX() + r.getWidth())) &&
@@ -465,13 +509,13 @@ public class Runner extends Application {
                         case "objInventoryBelt":
                             if (((x > beltXY.getX() && x < beltXY.getX() + r.getWidth()) || (x + width > beltXY.getX() && x + width < beltXY.getX() + r.getWidth())) &&
                                     ((y > beltXY.getY() && y < beltXY.getY() + r.getHeight()) || (y + height > beltXY.getY() && y + height < beltXY.getY() + r.getHeight()))) {
-                                initDialog("Belt");
+                                initDialog("Gucci Belt");
                             }
                             break;
                         case "objInventoryBackpack":
                             if (((x > backpackXY.getX() && x < backpackXY.getX() + r.getWidth()) || (x + width > backpackXY.getX() && x + width < backpackXY.getX() + r.getWidth())) &&
                                     ((y > backpackXY.getY() && y < backpackXY.getY() + r.getHeight()) || (y + height > backpackXY.getY() && y + height < backpackXY.getY() + r.getHeight()))) {
-                                initDialog("Backpack");
+                                initDialog("LV Backpack");
                             }
                             break;
                         case "a":
@@ -490,7 +534,7 @@ public class Runner extends Application {
             }
         }
     }
-    private void initDialog(String player){
+    private void initDialog(String character){
         activeDialog = true;
         Rectangle r = new Rectangle(0,500,800,100);
         r.setFill(Color.WHITE);
@@ -498,7 +542,7 @@ public class Runner extends Application {
         r.setStrokeWidth(3);
         r.setId("dialog");
         root.getChildren().add(r);
-        if(currentDialog==-2&&player==null){
+        if(currentDialog==-2&&character==null){
             Text t = new Text("Player:\nPress W, A, S, D to move, and E to interact");
             t.setLayoutX(15);
             t.setLayoutY(530);
@@ -507,8 +551,8 @@ public class Runner extends Application {
             t.setId("dialog");
             root.getChildren().add(t);
             currentDialog++;
-        }
-        else if(currentDialog==-1&&player==null){
+            System.out.println(currentDialog);
+        } else if(currentDialog==-1&&character==null){
             Text t = new Text("Player:\nPress "+presetKeys.get(presetKeys.size()-1)+" to open inventory");
             t.setLayoutX(15);
             t.setLayoutY(530);
@@ -517,8 +561,8 @@ public class Runner extends Application {
             t.setId("dialog");
             root.getChildren().add(t);
             currentDialog++;
-        }
-        else if (currentDialog==0&&player.equals("Ninja")){
+            System.out.println(currentDialog);
+        } else if (currentDialog==0&&character.equals("Ninja")){
             Text t = new Text("Ninja:\nHey man, I just lost my gucci belt it would be so helpful if you found it");
             t.setLayoutX(15);
             t.setLayoutY(530);
@@ -527,8 +571,17 @@ public class Runner extends Application {
             t.setId("dialog");
             root.getChildren().add(t);
             currentDialog++;
+            System.out.println(currentDialog);
+        } else if(currentDialog==1&&character.equals("Ninja")){
+            Text t = new Text("Ninja:\nWusspopin my boy over their looks like he needs some help");
+            t.setLayoutX(15);
+            t.setLayoutY(530);
+            t.setFont(new Font(28));
+            t.setWrappingWidth(760);
+            t.setId("dialog");
+            root.getChildren().add(t);
         }
-        else if(currentDialog==0&&player.equals("Knight")){
+        else if(currentDialog==0&&character.equals("Knight")){
             Text t = new Text("Knight:\nWusspopin my boy over their looks like he needs some help");
             t.setLayoutX(15);
             t.setLayoutY(530);
@@ -536,8 +589,7 @@ public class Runner extends Application {
             t.setWrappingWidth(760);
             t.setId("dialog");
             root.getChildren().add(t);
-        }
-        else if(player.equals("Belt")&&!containsBackpack){
+        } else if(character.equals("Gucci Belt")&&!containsBackpack){
             Text t = new Text("Player:\nSorry broskii can't carry dont have a backpack");
             t.setLayoutX(15);
             t.setLayoutY(530);
@@ -545,18 +597,21 @@ public class Runner extends Application {
             t.setWrappingWidth(760);
             t.setId("dialog");
             root.getChildren().add(t);
-        }
-        else if(player.equals("Belt")&&containsBackpack){
+        } else if(character.equals("Gucci Belt")&&containsBackpack){
+            currentDialog=2;
             Text t = new Text("Player:\nNow we can give him his belt back");
             t.setLayoutX(15);
             t.setLayoutY(530);
             t.setFont(new Font(28));
             t.setWrappingWidth(760);
             t.setId("dialog");
-            inventory.add(new InventoryData(formatImage(new ImageView("resources/Objects/belt.png")),"Belt"));
+            inventory.add(new InventoryData(formatImage(new ImageView("resources/Objects/belt.png")),"Gucci Belt"));
+            root.getChildren().remove(belt);
+            root.getChildren().remove(beltHitbox);
+            currentDialog++;
+            System.out.println(currentDialog);
             root.getChildren().add(t);
-        }
-        else if(player.equals("Backpack")){
+        } else if(character.equals("LV Backpack")){
             Text t = new Text("Player:\nAyy now we can carry stuff");
             t.setLayoutX(15);
             t.setLayoutY(530);
@@ -564,8 +619,110 @@ public class Runner extends Application {
             t.setWrappingWidth(760);
             t.setId("dialog");
             root.getChildren().add(t);
-            currentDialog++;
+            root.getChildren().remove(backpack);
+            root.getChildren().remove(backpackHitbox);
             containsBackpack = true;
+            System.out.println(currentDialog);
+        }else if(character.equals("Ninja")&&currentDialog==3){
+            Text t = new Text("Ninja:\nThanks man I appreciate it, here have some dough");
+            t.setLayoutX(15);
+            t.setLayoutY(530);
+            t.setFont(new Font(28));
+            t.setWrappingWidth(760);
+            t.setId("dialog");
+            root.getChildren().add(t);
+            cloutCount++;
+            moneyCount+=10;
+            currentDialog++;
+            inventory.remove(0);
+            System.out.println(currentDialog);
+            /**
+             * @NinjaQuest
+             */
+        }else if(character.equals("Ninja")&&currentDialog==4&&moneyCount==10){
+            Text t = new Text("Ninja:\nHey you're pretty useful I have a quest you can do for me");
+            t.setLayoutX(15);
+            t.setLayoutY(530);
+            t.setFont(new Font(28));
+            t.setWrappingWidth(760);
+            t.setId("dialog");
+            root.getChildren().add(t);
+            activeQuest = true;
+            currentDialog++;
+            System.out.println(currentDialog);
+            questFor = "NinjaNQ";
+            /**
+             * @NinjaFriendlyQuest
+             */
+        }else if(character.equals("Knight")&&currentDialog==4&&moneyCount==10){
+            Text t = new Text("Knight:\nYo mane I have a quest yo could do for me");
+            t.setLayoutX(15);
+            t.setLayoutY(530);
+            t.setFont(new Font(28));
+            t.setWrappingWidth(760);
+            t.setId("dialog");
+            root.getChildren().add(t);
+            activeQuest = true;
+            currentDialog++;
+            System.out.println(currentDialog);
+            questFor = "KnightNFQ";
+
+        } else if(character.equals("Knight")&&currentDialog==5&&moneyCount==10&&activeQuest){
+
+        } else if(character.equals("Knight")&&currentDialog==3){
+            Text t = new Text("Knight:\nWell I don't need it but I'll take it, here's some cash");
+            t.setLayoutX(15);
+            t.setLayoutY(530);
+            t.setFont(new Font(28));
+            t.setWrappingWidth(760);
+            t.setId("dialog");
+            root.getChildren().add(t);
+            moneyCount+=50;
+            currentDialog++;
+            System.out.println(currentDialog);
+            inventory.remove(0);
+        }else if(character.equals("Ninja")&&moneyCount==50){
+            Text t = new Text("Ninja:\nWhat the heck did you do with my gucci belt");
+            t.setLayoutX(15);
+            t.setLayoutY(530);
+            t.setFont(new Font(28));
+            t.setWrappingWidth(760);
+            t.setId("dialog");
+            root.getChildren().add(t);
+            cloutCount-=5;
+            leavingCharacters.add("Ninja");
+
+        }
+        /**
+         * @NinjaRejectQuest
+         */
+        else if(character.equals("Knight")&&currentDialog==4&&moneyCount==50){
+            Text t = new Text("Knight:\nHey I have a quest that you can complete for me");
+            t.setLayoutX(15);
+            t.setLayoutY(530);
+            t.setFont(new Font(28));
+            t.setWrappingWidth(760);
+            t.setId("dialog");
+            root.getChildren().add(t);
+            currentDialog++;
+            currentQuest.setQuestName("Quest For Money");
+            ArrayList<String> requirements = new ArrayList<>();
+            requirements.add("Get Over $100");
+            requirements.add("Acquire a rolex");
+            requirements.add("Found a business");
+            currentQuest.setReqs(requirements);
+            currentQuests.put(currentQuest,false);
+            activeQuest = true;
+            System.out.println(currentDialog);
+            questFor = "KnightNRQ";
+        }else if(currentDialog==5&&character.equals("Knight")&&moneyCount==50&&activeQuest){
+            Text t = new Text("Knight:\nHey you complete that quest yet?");
+            t.setLayoutX(15);
+            t.setLayoutY(530);
+            t.setFont(new Font(28));
+            t.setWrappingWidth(760);
+            t.setId("dialog");
+            root.getChildren().add(t);
         }
     }
     private void moveUp(){
@@ -663,36 +820,72 @@ public class Runner extends Application {
         r.setFill(Color.WHITE);
         miniPane.getChildren().add(r);
 
-        Text t1 = new Text("Options");
+        Text t1 = new Text("Inventory");
         t1.setFont(new Font(32));
         t1.setLayoutY(47);
-        t1.setLayoutX(75);
+        t1.setLayoutX(30);
         miniPane.getChildren().add(t1);
 
-        TableColumn tc1 = new TableColumn<>("Picture");
-        tc1.setCellValueFactory(new PropertyValueFactory<InventoryData, ImageView>("image"));
-        tc1.setMinWidth(70);
+        Text t2 = new Text("Money: $"+moneyCount);
+        t2.setFont(new Font(12));
+        t2.setLayoutY(25);
+        t2.setLayoutX(190);
+        miniPane.getChildren().add(t2);
 
-        TableColumn tc2 = new TableColumn<>("Text");
-        tc2.setCellValueFactory(new PropertyValueFactory<InventoryData, String>("itemName"));
-        tc2.setMinWidth(60);
+        Text t3 = new Text("NetWorth: $"+(moneyCount+totalValueInventory()));
+        t3.setFont(new Font(12));
+        t3.setLayoutY(40);
+        t3.setLayoutX(190);
+        miniPane.getChildren().add(t3);
 
-        TableView<InventoryData> table = new TableView<>();
-        table.setEditable(false);
-        table.getColumns().addAll(tc1,tc2);
-        table.setItems(inventory);
+        Text t4 = new Text("Clout: "+cloutCount+"C");
+        t4.setFont(new Font(12));
+        t4.setLayoutY(55);
+        t4.setLayoutX(190);
+        miniPane.getChildren().add(t4);
 
-        table.setMaxSize(320,300);
+        if(containsBackpack) {
+            TableColumn tc1 = new TableColumn<>("Picture");
+            tc1.setCellValueFactory(new PropertyValueFactory<InventoryData, ImageView>("image"));
+            tc1.setMinWidth(70);
 
-        final VBox vbox = new VBox();
-        vbox.setId("tablebox");
-        vbox.setSpacing(5);
-        vbox.setPadding(new Insets(10, 0, 0, 10));
-        vbox.getChildren().addAll(table);
-        vbox.setLayoutX(15);
-        vbox.setLayoutY(100);
+            TableColumn tc2 = new TableColumn<>("Text");
+            tc2.setCellValueFactory(new PropertyValueFactory<InventoryData, String>("itemName"));
+            tc2.setMinWidth(60);
 
-        miniPane.getChildren().add(vbox);
+            TableView<InventoryData> table = new TableView<>();
+            table.setEditable(false);
+            table.getColumns().addAll(tc1, tc2);
+            table.setItems(inventory);
+
+            table.setMaxSize(170, 350);
+
+            final VBox vbox = new VBox();
+            vbox.setId("tablebox");
+            vbox.setSpacing(5);
+            vbox.setPadding(new Insets(10, 0, 0, 10));
+            vbox.getChildren().addAll(table);
+            vbox.setLayoutX(15);
+            vbox.setLayoutY(75);
+
+            if(inventory.size()!=0) {
+                miniPane.getChildren().add(vbox);
+            }else{
+                Text t = new Text("Y'all don't have anything in yo backpack");
+                t.setFont(new Font(28));
+                t.setLayoutY(100);
+                t.setLayoutX(10);
+                t.setWrappingWidth(335);
+                miniPane.getChildren().add(t);
+            }
+        }else{
+            Text t = new Text("You can't carry anything y'all don't got a backpack");
+            t.setFont(new Font(28));
+            t.setLayoutY(100);
+            t.setLayoutX(10);
+            t.setWrappingWidth(335);
+            miniPane.getChildren().add(t);
+        }
 
 
         root.requestFocus();
@@ -730,10 +923,29 @@ public class Runner extends Application {
             return itemName;
         }
     }
-    public ImageView formatImage(ImageView image){
+    private ImageView formatImage(@NotNull ImageView image){
         image.setFitHeight(70);
         image.setFitWidth(70);
         image.setEffect(null);
         return image;
+    }
+    private double totalValueInventory(){
+        double total = 0;
+        for(int i = 0; i<inventory.size(); i++){
+            if(inventory.get(i).getItemName().equals("Gucci Belt")){
+                total+=300;
+            }
+        }
+        return total;
+    }
+    private void drawReqs(String requirement, Boolean complete){
+        System.out.println(requirement+", "+complete);
+    }
+    private void moveOffScreen(@NotNull String s){
+        if(s.equals("Ninja")){
+            ninja.setRotate(180);
+            ninja.setLayoutX(ninja.getLayoutX()+1);
+            ninjaHitbox.setLayoutX(ninjaHitbox.getLayoutX()+1);
+        }
     }
 }

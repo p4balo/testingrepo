@@ -24,7 +24,8 @@ import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,8 +33,7 @@ import java.util.Set;
 
 public class Runner extends Application {
     private HashMap<KeyCode, Boolean> pressedKeys = new HashMap<>();
-    private HashMap<Quest, Boolean> currentQuests = new HashMap<>();
-    private ArrayList<String> idList = new ArrayList<>();
+    private HashMap<Quest, Boolean> currentActiveQuest = new HashMap<>();
     private ArrayList<KeyCode> presetKeys = new ArrayList<>();
     private ArrayList<Image> idlePosePlayer = new ArrayList<>();
     private ArrayList<Image> movingPosePlayer = new ArrayList<>();
@@ -76,8 +76,9 @@ public class Runner extends Application {
     private boolean openInventory;
     private boolean activeQuest;
     private String questFor;
+    private String cssPath = "Stylesheet.css";
 
-    //make it so you cant get money if you dont have wallet, but dont have wallet images rn
+    //make it so you cant get money if you don't have wallet, but don't have wallet images rn
     private boolean containsWallet;
 
     public Runner() {
@@ -264,16 +265,13 @@ public class Runner extends Application {
                     ninja.setImage(idlePoseninja.get(idleCountNPC/10));
                 }
                 idleCountNPC++;
-                if(currentQuests.size()>0){
-                    List<Quest> list = new ArrayList<>(currentQuests.keySet());
+                if(currentActiveQuest.size()>0){
+                    List<Quest> list = new ArrayList<>(currentActiveQuest.keySet());
                     Quest q = list.get(0);
                     if(q.questComplete()){
-                        currentQuests.replace(currentQuest, true);
+                        currentActiveQuest.replace(currentQuest, true);
                     }
-                    List<String> reqs = q.getReqs();
-                    for(int i = 0; i<reqs.size(); i++){
-                        drawReqs(reqs.get(i), q.getReqAtPos(i));
-                    }
+                    drawQuest(q);
                 }
                 if(leavingCharacters.size()>0){
                     for(int i = 0; i<leavingCharacters.size(); i++){
@@ -375,7 +373,9 @@ public class Runner extends Application {
 
 
         Button b1 = new Button("Start Quest");
+        b1.setId("StartGame");
         b1.setFont(new Font("Comic Sans MS", 16));
+        b1.getStylesheets().add(cssPath);
         b1.setLayoutX(300);
         b1.setLayoutY(200);
         b1.setOnAction(event -> {
@@ -384,10 +384,6 @@ public class Runner extends Application {
         });
         miniPane.getChildren().add(b1);
 
-        /*cssify button
-        remove background
-        remove boarders
-        */
         Button b2 = new Button();
         b2.setLayoutX(0);
         b2.setLayoutY(550);
@@ -395,9 +391,8 @@ public class Runner extends Application {
         resource1.setFitWidth(60);
         resource1.setFitHeight(50);
         b2.setGraphic(resource1);
-        idList.add("OptionButton");
-        b2.setId(idList.get(idList.size() - 1));
-        b2.getStylesheets().add("Stylesheet.css");
+        b2.setId("Options");
+        b2.getStylesheets().add(cssPath);
         b2.setOnAction(event -> {
             for (int i = 0; i < miniPane.getChildren().size(); i++) {
                 Node n = miniPane.getChildren().get(i);
@@ -649,6 +644,13 @@ public class Runner extends Application {
             root.getChildren().add(t);
             activeQuest = true;
             currentDialog++;
+            currentQuest.setQuestName("Quest For Ninja");
+            ArrayList<String> requirements = new ArrayList<>();
+            requirements.add("Get Ninja's Weapon");
+            requirements.add("Achieve the Clouts");
+            requirements.add("Acquire 50$");
+            currentQuest.setReqs(requirements);
+            currentActiveQuest.put(currentQuest,false);
             System.out.println(currentDialog);
             questFor = "NinjaNQ";
             /**
@@ -664,6 +666,13 @@ public class Runner extends Application {
             root.getChildren().add(t);
             activeQuest = true;
             currentDialog++;
+            currentQuest.setQuestName("Quest For Clout");
+            ArrayList<String> requirements = new ArrayList<>();
+            requirements.add("Get over 10C");
+            requirements.add("Get a Hoddie");
+            requirements.add("Be a Landlord");
+            currentQuest.setReqs(requirements);
+            currentActiveQuest.put(currentQuest,false);
             System.out.println(currentDialog);
             questFor = "KnightNFQ";
 
@@ -711,7 +720,7 @@ public class Runner extends Application {
             requirements.add("Acquire a rolex");
             requirements.add("Found a business");
             currentQuest.setReqs(requirements);
-            currentQuests.put(currentQuest,false);
+            currentActiveQuest.put(currentQuest,false);
             activeQuest = true;
             System.out.println(currentDialog);
             questFor = "KnightNRQ";
@@ -786,12 +795,11 @@ public class Runner extends Application {
             root.getChildren().remove(miniPane);
             root.getChildren().add(titleScreen());
         });
-        idList.add("ExitButton");
-        exit.setId(idList.get(idList.size() - 1));
+        exit.setId("Exit");
+        exit.getStylesheets().add(cssPath);
         exit.getStylesheets().add("Stylesheet.css");
         miniPane.getChildren().add(exit);
 
-        //figure out how to make this work
         root.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ESCAPE) {
                 root.getChildren().remove(miniPane);
@@ -938,8 +946,31 @@ public class Runner extends Application {
         }
         return total;
     }
-    private void drawReqs(String requirement, Boolean complete){
-        System.out.println(requirement+", "+complete);
+    private void drawQuest(Quest q){
+        boolean alreadyDrawn = false;
+        for(int i = 0; i<root.getChildren().size(); i++){
+            if(root.getChildren().get(i).getId()!=null){
+                if(root.getChildren().get(i).getId().equals(q.getQuestName())){
+                    alreadyDrawn = true;
+                }
+            }
+        }
+        if(!alreadyDrawn) {
+            Pane miniRoot = new Pane();
+            miniRoot.setLayoutY(0);
+            miniRoot.setLayoutX(650);
+            miniRoot.setId(q.getQuestName());
+
+            Color colorA = new Color(.9, .9, .9, .7);
+
+            Rectangle r1 = new Rectangle(100, 175);
+            r1.setFill(colorA);
+            r1.setStrokeWidth(1);
+            r1.setStroke(colorA);
+            miniRoot.getChildren().add(r1);
+
+            root.getChildren().add(miniRoot);
+        }
     }
     private void moveOffScreen(@NotNull String s){
         if(s.equals("Ninja")){

@@ -1,0 +1,28 @@
+#StartGame{
+    -fx-border-color: rgb(255,0,0);
+    -fx-border-width: 5px;
+    -fx-background-color: rgb(255,0,0);
+    -fx-opacity: 0.7;
+    -fx-text-fill: rgb(255,255,255);
+    -fx-font-size: large;
+    -fx-font-family: Arial;
+}
+#StartGame:hover{
+    -fx-opacity: 1;
+}
+#Options {
+    -fx-border-color: transparent;
+    -fx-background-color: transparent;
+    -fx-opacity: 0.7;
+}
+#Options:hover{
+    -fx-opacity: 1;
+}
+#Exit {
+    -fx-border-color: transparent;
+    -fx-background-color: transparent;
+    -fx-opacity: 0.5;
+}
+#Exit:hover {
+    -fx-opacity: 1;
+}

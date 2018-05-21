@@ -1,7 +1,7 @@
 import com.sun.istack.internal.NotNull;
 import java.util.*;
 
-public class Quest{
+class Quest{
     private String name;
     private HashMap<String, Boolean> reqs;
     Quest(){

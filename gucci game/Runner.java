@@ -41,6 +41,7 @@ public class Runner extends Application {
     private ArrayList<Image> idlePoseknight = new ArrayList<>();
     private ArrayList<Image> idlePoseninja = new ArrayList<>();
     private ArrayList<String> leavingCharacters = new ArrayList<>();
+    private ArrayList<String> inventoryNames = new ArrayList<>();
     private ObservableList<InventoryData> inventory = FXCollections.observableArrayList();
     private Pane root;
     private Quest currentQuest = new Quest();
@@ -75,6 +76,9 @@ public class Runner extends Application {
     private boolean containsBackpack;
     private boolean openInventory;
     private boolean activeQuest;
+    private boolean buisnessOwner;
+    private boolean landLord;
+    private boolean updated;
     private String questFor;
     private String cssPath = "Stylesheet.css";
 
@@ -201,9 +205,7 @@ public class Runner extends Application {
         new AnimationTimer(){
             @Override
             public void handle(long now) {
-                for(int k = 0; k<pressedKeys.size(); k++) {
-                    moving = pressedKeys.values().contains(true);
-                }
+                moving = pressedKeys.values().contains(true);
                 if(moving){
                     if((currentMovingImage/currentMovingDecrement)==idlePosePlayer.size()){
                         currentMovingImage = 0;
@@ -269,9 +271,12 @@ public class Runner extends Application {
                     List<Quest> list = new ArrayList<>(currentActiveQuest.keySet());
                     Quest q = list.get(0);
                     if(q.questComplete()){
-                        currentActiveQuest.replace(currentQuest, true);
+                        currentActiveQuest.remove(currentQuest);
+                        removeQuest();
+                        activeQuest = false;
                     }
                     drawQuest(q);
+                    checkReqs(q);
                 }
                 if(leavingCharacters.size()>0){
                     for(int i = 0; i<leavingCharacters.size(); i++){
@@ -463,6 +468,27 @@ public class Runner extends Application {
                     }
                     drawInventory();
                 }
+                if(event.getCode() == KeyCode.P && activeQuest){
+                    for(int i = 0; i<currentQuest.getReqs().size(); i++){
+                        currentQuest.completeReqAtPos(i);
+                    }
+                    updated = false;
+                    drawQuest(currentQuest);
+                    if(questFor.equals("KnightNRQ")) {
+                        inventory.add(new InventoryData(formatImage(new ImageView("resources/Objects/Rolex.png")), "Rolex"));
+                        inventoryNames.add("Rolex");
+                        buisnessOwner = true;
+                        moneyCount+=100;
+                        currentDialog++;
+                    }else if(questFor.equals("KnightNFQ")){
+                        cloutCount+=10;
+                        inventory.add(new InventoryData(formatImage(new ImageView("resources/Objects/hoodie.png")),"Supreme Hoodie"));
+                        inventoryNames.add("Supreme Hoodie");
+                        landLord = true;
+                        currentDialog++;
+                    }
+                    activeQuest = false;
+                }
             }
         });
         root.setOnKeyReleased(event -> {
@@ -490,26 +516,26 @@ public class Runner extends Application {
                     Rectangle r = (Rectangle) root.getChildren().get(i);
                     switch (root.getChildren().get(i).getId()) {
                         case "objK":
-                            if (((x > knightXY.getX() && x < knightXY.getX() + r.getWidth()) || (x + width > knightXY.getX() && x + width < knightXY.getX() + r.getWidth())) &&
-                                    ((y > knightXY.getY() && y < knightXY.getY() + r.getHeight()) || (y + height > knightXY.getY() && y + height < knightXY.getY() + r.getHeight()))) {
+                            if (((x > knightXY.getX() && x < knightXY.getX() + r.getWidth()) || (x + width > knightXY.getX() && x + width < knightXY.getX() + r.getWidth()) || (((x + (width/2)) < knightXY.getX()+r.getWidth())&&((x + (width/2)) > knightXY.getX()))) &&
+                                    ((y > knightXY.getY() && y < knightXY.getY() + r.getHeight()) || (y + height > knightXY.getY() && y + height < knightXY.getY() + r.getHeight()) || (((y + (height/2)) < knightXY.getY()+r.getHeight())&&((y + (height/2)) > knightXY.getY())))) {
                                 initDialog("Knight");
                             }
                             break;
                         case "objN":
-                            if (((x > ninjaXY.getX() && x < ninjaXY.getX() + r.getWidth()) || (x + width > ninjaXY.getX() && x + width < ninjaXY.getX() + r.getWidth())) &&
-                                    ((y > ninjaXY.getY() && y < ninjaXY.getY() + r.getHeight()) || (y + height > ninjaXY.getY() && y + height < ninjaXY.getY() + r.getHeight()))) {
+                            if (((x > ninjaXY.getX() && x < ninjaXY.getX() + r.getWidth()) || (x + width > ninjaXY.getX() && x + width < ninjaXY.getX() + r.getWidth()) || (((x + (width/2)) < ninjaXY.getX()+r.getWidth())&&((x + (width/2)) > ninjaXY.getX()))) &&
+                                    ((y > ninjaXY.getY() && y < ninjaXY.getY() + r.getHeight()) || (y + height > ninjaXY.getY() && y + height < ninjaXY.getY() + r.getHeight()) || (((y + (height/2)) < ninjaXY.getY()+r.getHeight())&&((y + (height/2)) > ninjaXY.getY())))) {
                                 initDialog("Ninja");
                             }
                             break;
                         case "objInventoryBelt":
-                            if (((x > beltXY.getX() && x < beltXY.getX() + r.getWidth()) || (x + width > beltXY.getX() && x + width < beltXY.getX() + r.getWidth())) &&
-                                    ((y > beltXY.getY() && y < beltXY.getY() + r.getHeight()) || (y + height > beltXY.getY() && y + height < beltXY.getY() + r.getHeight()))) {
+                            if (((x > beltXY.getX() && x < beltXY.getX() + r.getWidth()) || (x + width > beltXY.getX() && x + width < beltXY.getX() + r.getWidth()) || (((x + (width/2)) < beltXY.getX()+r.getWidth())&&((x + (width/2)) > beltXY.getX()))) &&
+                                    ((y > beltXY.getY() && y < beltXY.getY() + r.getHeight()) || (y + height > beltXY.getY() && y + height < beltXY.getY() + r.getHeight()) || (((y + (height/2)) < beltXY.getY()+r.getHeight())&&((y + (height/2)) > beltXY.getY())))) {
                                 initDialog("Gucci Belt");
                             }
                             break;
                         case "objInventoryBackpack":
-                            if (((x > backpackXY.getX() && x < backpackXY.getX() + r.getWidth()) || (x + width > backpackXY.getX() && x + width < backpackXY.getX() + r.getWidth())) &&
-                                    ((y > backpackXY.getY() && y < backpackXY.getY() + r.getHeight()) || (y + height > backpackXY.getY() && y + height < backpackXY.getY() + r.getHeight()))) {
+                            if (((x > backpackXY.getX() && x < backpackXY.getX() + r.getWidth()) || (x + width > backpackXY.getX() && x + width < backpackXY.getX() + r.getWidth()) || (((x + (width/2)) < backpackXY.getX()+r.getWidth())&&((x + (width/2)) > backpackXY.getX()))) &&
+                                    ((y > backpackXY.getY() && y < backpackXY.getY() + r.getHeight()) || (y + height > backpackXY.getY() && y + height < backpackXY.getY() + r.getHeight()) || (((y + (height/2)) < backpackXY.getY()+r.getHeight())&&((y + (height/2)) > backpackXY.getY())))) {
                                 initDialog("LV Backpack");
                             }
                             break;
@@ -601,6 +627,7 @@ public class Runner extends Application {
             t.setWrappingWidth(760);
             t.setId("dialog");
             inventory.add(new InventoryData(formatImage(new ImageView("resources/Objects/belt.png")),"Gucci Belt"));
+            inventoryNames.add("Gucci Belt");
             root.getChildren().remove(belt);
             root.getChildren().remove(beltHitbox);
             currentDialog++;
@@ -629,7 +656,16 @@ public class Runner extends Application {
             cloutCount++;
             moneyCount+=10;
             currentDialog++;
-            inventory.remove(0);
+            for(int i = 0; i<inventory.size(); i++){
+                if(inventory.get(i).getItemName().equals("Gucci Belt")){
+                    inventory.remove(i);
+                }
+            }
+            for(int i = 0; i<inventoryNames.size(); i++){
+                if(inventoryNames.get(i).equals("Gucci Belt")){
+                    inventoryNames.remove(i);
+                }
+            }
             System.out.println(currentDialog);
             /**
              * @NinjaQuest
@@ -652,7 +688,12 @@ public class Runner extends Application {
             currentQuest.setReqs(requirements);
             currentActiveQuest.put(currentQuest,false);
             System.out.println(currentDialog);
+            /**
+             * @For_Ease_Of_Use
+             */
             questFor = "NinjaNQ";
+
+
             /**
              * @NinjaFriendlyQuest
              */
@@ -674,7 +715,11 @@ public class Runner extends Application {
             currentQuest.setReqs(requirements);
             currentActiveQuest.put(currentQuest,false);
             System.out.println(currentDialog);
+            /**
+             * @For_Ease_Of_Use
+             */
             questFor = "KnightNFQ";
+
 
         } else if(character.equals("Knight")&&currentDialog==5&&moneyCount==10&&activeQuest){
 
@@ -723,7 +768,12 @@ public class Runner extends Application {
             currentActiveQuest.put(currentQuest,false);
             activeQuest = true;
             System.out.println(currentDialog);
+            /**
+             * @For_Ease_Of_Use
+             */
             questFor = "KnightNRQ";
+
+
         }else if(currentDialog==5&&character.equals("Knight")&&moneyCount==50&&activeQuest){
             Text t = new Text("Knight:\nHey you complete that quest yet?");
             t.setLayoutX(15);
@@ -733,6 +783,7 @@ public class Runner extends Application {
             t.setId("dialog");
             root.getChildren().add(t);
         }
+
     }
     private void moveUp(){
         player.setLayoutY(player.getLayoutY()-movementIncrement);
@@ -943,6 +994,12 @@ public class Runner extends Application {
             if(inventory.get(i).getItemName().equals("Gucci Belt")){
                 total+=300;
             }
+            if(inventory.get(i).getItemName().equals("Rolex")){
+                total+=1000;
+            }
+            if(inventory.get(i).getItemName().equals("Supreme Hoodie")){
+                total+=150;
+            }
         }
         return total;
     }
@@ -950,8 +1007,11 @@ public class Runner extends Application {
         boolean alreadyDrawn = false;
         for(int i = 0; i<root.getChildren().size(); i++){
             if(root.getChildren().get(i).getId()!=null){
-                if(root.getChildren().get(i).getId().equals(q.getQuestName())){
+                if(root.getChildren().get(i).getId().contains(q.getQuestName())){
                     alreadyDrawn = true;
+                }else if(root.getChildren().get(i).getId().contains("QuestReq")&&!updated){
+                    root.getChildren().remove(i);
+                    i--;
                 }
             }
         }
@@ -959,17 +1019,114 @@ public class Runner extends Application {
             Pane miniRoot = new Pane();
             miniRoot.setLayoutY(0);
             miniRoot.setLayoutX(650);
-            miniRoot.setId(q.getQuestName());
+            miniRoot.setId(q.getQuestName()+"qwxz");
 
             Color colorA = new Color(.9, .9, .9, .7);
 
-            Rectangle r1 = new Rectangle(100, 175);
+            Rectangle r1 = new Rectangle(150, 175);
             r1.setFill(colorA);
             r1.setStrokeWidth(1);
             r1.setStroke(colorA);
+            r1.setId("qwxz");
             miniRoot.getChildren().add(r1);
 
             root.getChildren().add(miniRoot);
+
+            Text t1 = new Text(currentQuest.getQuestName());
+            t1.setFill(Color.BLACK);
+            t1.setLayoutX(652);
+            t1.setLayoutY(20);
+            t1.setFont(new Font(15));
+            t1.setId("qwxz"+"1");
+            root.getChildren().add(t1);
+        }
+        if(!updated) {
+            for (int i = 0; i < q.getReqs().size(); i++) {
+                CheckBox cb1 = new CheckBox();
+                cb1.setId("QuestReq"+"qwxz");
+                cb1.setLayoutY(35 + (i * 30));
+                cb1.setLayoutX(652);
+                cb1.setMaxSize(7, 7);
+                if (q.getReqAtPos(i)) {
+                    cb1.fire();
+                }
+                cb1.setDisable(true);
+                root.getChildren().add(cb1);
+
+                Text t1 = new Text(q.getReqNameAtPos(i));
+                t1.setId("QuestReq"+"qwxz");
+                t1.setLayoutX(673);
+                t1.setLayoutY(50 + (i * 30));
+                t1.setFont(new Font(12));
+                t1.setStroke(Color.BLACK);
+                t1.setFill(Color.BLACK);
+                if (q.getReqAtPos(i)) {
+                    t1.setStrikethrough(true);
+                }
+                root.getChildren().add(t1);
+            }
+            updated = true;
+        }
+    }
+    private void removeQuest(){
+        for(int i = 0; i<root.getChildren().size(); i++){
+            if(root.getChildren().get(i).getId()!=null){
+                if(root.getChildren().get(i).toString().contains("Pane")){
+                    Pane p = (Pane) root.getChildren().get(i);
+                    for(int f = 0; f<p.getChildren().size(); f++){
+                        p.getChildren().remove(f);
+                        root.getChildren().remove(i);
+                        root.getChildren().add(p);
+                    }
+                }
+                else if(root.getChildren().get(i).getId().contains("qwxz")){
+                    root.getChildren().remove(i);
+                    i--;
+                }
+            }
+        }
+    }
+    private void checkReqs(Quest q){
+        switch (questFor) {
+            case "KnightNRQ":
+                for (String inventoryName : inventoryNames) {
+                    if (inventoryName.equals("Rolex")) {
+                        q.completeReqAtPos(0);
+                    }
+                }
+                if (moneyCount >= 100) {
+                    q.completeReqAtPos(1);
+                }
+                if (buisnessOwner) {
+                    q.completeReqAtPos(2);
+                }
+                break;
+            case "KnightNFQ":
+                if (cloutCount >= 10) {
+                    q.completeReqAtPos(0);
+                }
+                for (String itemName : inventoryNames) {
+                    if (itemName.equals("Supreme Hoodie")) {
+                        q.completeReqAtPos(1);
+                    }
+                }
+                if (landLord) {
+                    q.completeReqAtPos(2);
+                }
+                break;
+            case "NinjaNQ":
+                for (String itemName : inventoryNames) {
+                    if (itemName.equals("Ninja's Weapon")) {
+                        q.completeReqAtPos(0);
+                    }
+                    if (itemName.equals("Clouts")) {
+                        q.completeReqAtPos(1);
+                    }
+                }
+                if (moneyCount >= 50) {
+                    q.completeReqAtPos(2);
+                }
+                break;
         }
     }
     private void moveOffScreen(@NotNull String s){

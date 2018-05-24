@@ -1,4 +1,3 @@
-import com.sun.istack.internal.NotNull;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -708,7 +707,6 @@ public class Runner extends Application {
         primaryStage.setTitle("Gucci Game");
         primaryStage.getIcons().add(new Image("resources/Objects/Gucci.png"));
     }
-    @SuppressWarnings("Duplicates")
     private Pane titleScreen() {
         mp.play(2,true);
         Pane miniPane = new Pane();
@@ -816,7 +814,6 @@ public class Runner extends Application {
 
         return miniPane;
     }
-    @SuppressWarnings("Duplicates")
     private void initGame(int currentScene) {
         root.getChildren().clear();
         root.requestFocus();
@@ -1876,7 +1873,7 @@ public class Runner extends Application {
             name = null;
             reqs = new HashMap<>();
         }
-        Quest(String name, @NotNull ArrayList<String> requirements){
+        Quest(String name,  ArrayList<String> requirements){
             this.name = name;
             reqs = new HashMap<>();
             for (String requirement : requirements) {
@@ -1921,7 +1918,7 @@ public class Runner extends Application {
             }
             return true;
         }
-        void addReq(@NotNull String requirement){
+        void addReq( String requirement){
             reqs.put(requirement, false);
         }
         String getReqNameAtPos(int position){
@@ -1937,16 +1934,15 @@ public class Runner extends Application {
             return new ArrayList<>(reqs.keySet());
         }
     }
-    @SuppressWarnings("Duplicates")
     public static class MusicPlayer{
         private ArrayList<Media> mediaLibrary;
         private MediaPlayer mp;
         MusicPlayer(){
             mediaLibrary = new ArrayList<>();
-            mediaLibrary.add(new Media(Paths.get("gucci game/resources/Sounds/pickingSometingUp.mp3").toUri().toString()));
-            mediaLibrary.add(new Media(Paths.get("gucci game/resources/Sounds/talking.mp3").toUri().toString()));
-            mediaLibrary.add(new Media(Paths.get("gucci game/resources/Sounds/titleMusic.mp3").toUri().toString()));
-            mediaLibrary.add(new Media(Paths.get("gucci game/resources/Sounds/gameMusic.mp3").toUri().toString()));
+            mediaLibrary.add(new Media(Paths.get("resources/Sounds/pickingSometingUp.mp3").toUri().toString()));
+            mediaLibrary.add(new Media(Paths.get("resources/Sounds/talking.mp3").toUri().toString()));
+            mediaLibrary.add(new Media(Paths.get("resources/Sounds/titleMusic.mp3").toUri().toString()));
+            mediaLibrary.add(new Media(Paths.get("resources/Sounds/gameMusic.mp3").toUri().toString()));
         }
         void play(int pos, boolean loop, int amountOfTime){
             mp = new MediaPlayer(mediaLibrary.get(pos));
@@ -1976,7 +1972,7 @@ public class Runner extends Application {
         }
 
     }
-    private ImageView formatImage(@NotNull ImageView image){
+    private ImageView formatImage( ImageView image){
         image.setFitHeight(70);
         image.setFitWidth(70);
         image.setEffect(null);
@@ -2098,7 +2094,6 @@ public class Runner extends Application {
             root.getChildren().add(endScreen);
         }
     }
-    @SuppressWarnings("Duplicates")
     private void checkReqs(Quest q){
         switch (questFor) {
             case "KnightNRQ":
@@ -2183,6 +2178,7 @@ public class Runner extends Application {
                 }
                 break;
             case "NinjaFinale":
+                System.out.println(buisnessOwner);
                 if(landLord){
                     q.completeReqAtPos(0);
                 }else if(moneyCount>=10000){
@@ -2254,7 +2250,7 @@ public class Runner extends Application {
                 break;
         }
     }
-    private void moveOffScreen(@NotNull String s){
+    private void moveOffScreen( String s){
         if(s.equals("Ninja")){
             ninja.setRotate(180);
             ninja.setLayoutX(ninja.getLayoutX()+1);

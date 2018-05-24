@@ -140,6 +140,7 @@ public class Runner extends Application {
     private boolean hasHoodie;
     private boolean foundNinja;
     private boolean finalQuest;
+    private boolean end;
     private String questFor;
     private String cssPath = "Stylesheet.css";
 
@@ -513,171 +514,173 @@ public class Runner extends Application {
         new AnimationTimer(){
             @Override
             public void handle(long now) {
-                moving = pressedKeys.values().contains(true);
-                if(moving){
-                    if((currentMovingImage/currentMovingDecrement)==idlePosePlayer.size()){
-                        currentMovingImage = 0;
+                if (!end) {
+                    moving = pressedKeys.values().contains(true);
+                    if (moving) {
+                        if ((currentMovingImage / currentMovingDecrement) == idlePosePlayer.size()) {
+                            currentMovingImage = 0;
+                        }
+                        if (currentMovingImage % currentMovingDecrement == 0) {
+                            player.setImage(movingPosePlayer.get(currentMovingImage / currentMovingDecrement));
+                        }
+                        currentMovingImage++;
+                    } else {
+                        if ((currentIdleImagePlayer / 10) == idlePosePlayer.size()) {
+                            currentIdleImagePlayer = 0;
+                        }
+                        if (currentIdleImagePlayer % 10 == 0) {
+                            player.setImage(idlePosePlayer.get(currentIdleImagePlayer / 10));
+                        }
+                        currentIdleImagePlayer++;
                     }
-                    if(currentMovingImage%currentMovingDecrement==0){
-                        player.setImage(movingPosePlayer.get(currentMovingImage/currentMovingDecrement));
-                    }
-                    currentMovingImage++;
-                }else{
-                    if((currentIdleImagePlayer/10)==idlePosePlayer.size()){
-                        currentIdleImagePlayer = 0;
-                    }
-                    if(currentIdleImagePlayer%10==0) {
-                        player.setImage(idlePosePlayer.get(currentIdleImagePlayer / 10));
-                    }
-                    currentIdleImagePlayer++;
-                }
-                /**
-                 * @reference
-                 * player.getLayoutX() + 20, player.getLayoutY() + 60, playerHitbox.getWidth(), playerHitbox.getHeight()
-                 */
-                if((player.getLayoutX()+20)<-80 && !activeTransition) {
-                    root.getChildren().clear();
-                    if (currentScene == 1) {
-                        previousScene = 1;
-                        currentScene = 3;
+                    /**
+                     * @reference
+                     * player.getLayoutX() + 20, player.getLayoutY() + 60, playerHitbox.getWidth(), playerHitbox.getHeight()
+                     */
+                    if ((player.getLayoutX() + 20) < -80 && !activeTransition) {
+                        root.getChildren().clear();
+                        if (currentScene == 1) {
+                            previousScene = 1;
+                            currentScene = 3;
+                            activeTransition = true;
+                            alreadyInScene = false;
+                            updatedQuests = false;
+                            initGame(currentScene);
+                        } else if (currentScene == 2) {
+                            previousScene = 2;
+                            currentScene = 1;
+                            activeTransition = true;
+                            alreadyInScene = false;
+                            updatedQuests = false;
+                            initGame(currentScene);
+                        }
+                    } else if ((player.getLayoutX() + 20) > 830 && !activeTransition) {
+                        root.getChildren().clear();
+                        if (currentScene == 1) {
+                            previousScene = 1;
+                            currentScene = 2;
+                            activeTransition = true;
+                            updatedQuests = false;
+                            alreadyInScene = false;
+                            initGame(currentScene);
+                        } else if (currentScene == 3) {
+                            previousScene = 3;
+                            currentScene = 1;
+                            activeTransition = true;
+                            updatedQuests = false;
+                            alreadyInScene = false;
+                            initGame(currentScene);
+                        }
+                    } else if ((player.getLayoutY()) > 600 && currentScene == 3 && !activeTransition) {
+                        root.getChildren().clear();
+                        previousScene = 3;
+                        currentScene = 4;
                         activeTransition = true;
-                        alreadyInScene = false;
                         updatedQuests = false;
+                        alreadyInScene = false;
                         initGame(currentScene);
-                    }else if(currentScene==2){
+                    } else if ((player.getLayoutY()) > 600 && currentScene == 2 && !activeTransition && hasHoodie) {
+                        root.getChildren().clear();
                         previousScene = 2;
-                        currentScene = 1;
+                        currentScene = 5;
                         activeTransition = true;
-                        alreadyInScene = false;
                         updatedQuests = false;
+                        alreadyInScene = false;
                         initGame(currentScene);
-                    }
-                } else if((player.getLayoutX()+20)>830 && !activeTransition){
-                    root.getChildren().clear();
-                    if(currentScene==1) {
-                        previousScene = 1;
+                    } else if ((player.getLayoutY()) > 600 && currentScene == 2 && !activeTransition && !hasHoodie) {
+                        initDialog("NoTravelSnow");
+                        activeTransition = true;
+                    } else if ((player.getLayoutY() + 60) < -70 && currentScene == 5 && !activeTransition) {
+                        root.getChildren().clear();
+                        previousScene = 5;
                         currentScene = 2;
                         activeTransition = true;
                         updatedQuests = false;
                         alreadyInScene = false;
                         initGame(currentScene);
-                    }else if(currentScene==3){
-                        previousScene = 3;
-                        currentScene = 1;
+                    } else if ((player.getLayoutY() + 60) < -70 && currentScene == 4 && !activeTransition) {
+                        root.getChildren().clear();
+                        previousScene = 4;
+                        currentScene = 3;
                         activeTransition = true;
                         updatedQuests = false;
                         alreadyInScene = false;
                         initGame(currentScene);
                     }
-                }else if((player.getLayoutY())>600 && currentScene==3 && !activeTransition){
-                    root.getChildren().clear();
-                    previousScene = 3;
-                    currentScene = 4;
-                    activeTransition = true;
-                    updatedQuests = false;
-                    alreadyInScene = false;
-                    initGame(currentScene);
-                }else if((player.getLayoutY())>600 && currentScene==2 && !activeTransition && hasHoodie){
-                    root.getChildren().clear();
-                    previousScene = 2;
-                    currentScene = 5;
-                    activeTransition = true;
-                    updatedQuests = false;
-                    alreadyInScene = false;
-                    initGame(currentScene);
-                }else if((player.getLayoutY())>600 && currentScene==2 && !activeTransition && !hasHoodie){
-                    initDialog("NoTravelSnow");
-                    activeTransition = true;
-                }else if((player.getLayoutY()+60)<-70 && currentScene==5 && !activeTransition){
-                    root.getChildren().clear();
-                    previousScene = 5;
-                    currentScene= 2;
-                    activeTransition = true;
-                    updatedQuests = false;
-                    alreadyInScene = false;
-                    initGame(currentScene);
-                }else if((player.getLayoutY()+60)<-70 && currentScene==4 && !activeTransition){
-                    root.getChildren().clear();
-                    previousScene = 4;
-                    currentScene= 3;
-                    activeTransition = true;
-                    updatedQuests = false;
-                    alreadyInScene = false;
-                    initGame(currentScene);
-                }
-                if(activeTransition){
-                    if(((player.getLayoutX()+20)>-80 && (player.getLayoutX()+20)<830)&&((player.getLayoutY()+60)<670 && (player.getLayoutY()+60)>-70)){
-                        activeTransition = false;
-                    }
-                }
-                for (KeyCode presetKey : presetKeys) {
-                    if (presetKey != KeyCode.I) {
-                        if (pressedKeys.get(presetKey)) {
-                            if (presetKey == KeyCode.W) {
-                                moveUp();
-                            }
-                            if (presetKey == KeyCode.A) {
-                                moveLeft();
-                            }
-                            if (presetKey == KeyCode.S) {
-                                moveDown();
-                            }
-                            if (presetKey == KeyCode.D) {
-                                moveRight();
-                            }
+                    if (activeTransition) {
+                        if (((player.getLayoutX() + 20) > -80 && (player.getLayoutX() + 20) < 830) && ((player.getLayoutY() + 60) < 670 && (player.getLayoutY() + 60) > -70)) {
+                            activeTransition = false;
                         }
                     }
-                }
-                if(activeDialog){
-                    dialogCounter++;
-                    if(dialogCounter==270){
-                        if(currentDialog==100){
-                            root.getChildren().clear();
-                            root.getChildren().add(endScreen);
-                        }
-                        for(int i = 0; i<root.getChildren().size(); i++){
-                            if(root.getChildren().get(i).getId()!=null){
-                                if(root.getChildren().get(i).getId().contains("dialog")){
-                                    root.getChildren().remove(i);
-                                    i--;
+                    for (KeyCode presetKey : presetKeys) {
+                        if (presetKey != KeyCode.I) {
+                            if (pressedKeys.get(presetKey)) {
+                                if (presetKey == KeyCode.W) {
+                                    moveUp();
+                                }
+                                if (presetKey == KeyCode.A) {
+                                    moveLeft();
+                                }
+                                if (presetKey == KeyCode.S) {
+                                    moveDown();
+                                }
+                                if (presetKey == KeyCode.D) {
+                                    moveRight();
                                 }
                             }
                         }
-                        dialogCounter = 0;
-                        activeDialog = false;
-                        if(currentDialog==-1){
-                            initDialog(null);
+                    }
+                    if (activeDialog) {
+                        dialogCounter++;
+                        if (dialogCounter == 270) {
+                            if (currentDialog == 100) {
+                                root.getChildren().clear();
+                                root.getChildren().add(endScreen);
+                            }
+                            for (int i = 0; i < root.getChildren().size(); i++) {
+                                if (root.getChildren().get(i).getId() != null) {
+                                    if (root.getChildren().get(i).getId().contains("dialog")) {
+                                        root.getChildren().remove(i);
+                                        i--;
+                                    }
+                                }
+                            }
+                            dialogCounter = 0;
+                            activeDialog = false;
+                            if (currentDialog == -1) {
+                                initDialog(null);
+                            }
                         }
                     }
-                }
-                if((idleCountNPC/10)==idlePoseknight.size()){
-                    idleCountNPC = 0;
-                }
-                if(idleCountNPC%10==0){
-                    knight.setImage(idlePoseknight.get(idleCountNPC/10));
-                    ninja.setImage(idlePoseninja.get(idleCountNPC/10));
-                }
-                idleCountNPC++;
-                if(currentActiveQuest.size()>0){
-                    List<Quest> list = new ArrayList<>(currentActiveQuest.keySet());
-                    Quest q = list.get(0);
-                    if(q.questComplete()){
-                        currentActiveQuest.remove(currentQuest);
-                        removeQuest();
-                        activeQuest = false;
-                    }else if(activeQuest){
-                        checkReqs(q);
-                        drawQuest(q);
+                    if ((idleCountNPC / 10) == idlePoseknight.size()) {
+                        idleCountNPC = 0;
                     }
-                }
-                if(leavingCharacters.size()>0){
-                    for (String leavingCharacter : leavingCharacters) {
-                        if (leavingCharacter.equals("Ninja")) {
-                            if (ninja.getLayoutX() < 850) {
-                                moveOffScreen("Ninja");
+                    if (idleCountNPC % 10 == 0) {
+                        knight.setImage(idlePoseknight.get(idleCountNPC / 10));
+                        ninja.setImage(idlePoseninja.get(idleCountNPC / 10));
+                    }
+                    idleCountNPC++;
+                    if (currentActiveQuest.size() > 0) {
+                        List<Quest> list = new ArrayList<>(currentActiveQuest.keySet());
+                        Quest q = list.get(0);
+                        if (q.questComplete()) {
+                            currentActiveQuest.remove(currentQuest);
+                            removeQuest();
+                            activeQuest = false;
+                        } else if (activeQuest) {
+                            checkReqs(q);
+                            drawQuest(q);
+                        }
+                    }
+                    if (leavingCharacters.size() > 0) {
+                        for (String leavingCharacter : leavingCharacters) {
+                            if (leavingCharacter.equals("Ninja")) {
+                                if (ninja.getLayoutX() < 850) {
+                                    moveOffScreen("Ninja");
+                                }
+                            } else if (leavingCharacter.equals("Knight")) {
+                                moveOffScreen("Knight");
                             }
-                        } else if (leavingCharacter.equals("Knight")) {
-                            moveOffScreen("Knight");
                         }
                     }
                 }
@@ -916,8 +919,16 @@ public class Runner extends Application {
             sign5.setRotate(0);
             sign5.setLayoutX(730);
             sign5HitBox.setLayoutX(730);
+            double temp = sign5XY.getY();
+            sign5XY = new Point2D(730,temp);
             root.getChildren().add(sign5);
             root.getChildren().add(sign5HitBox);
+            sign4.setLayoutY(500);
+            sign4.setRotate(0);
+            sign4.setLayoutX(300);
+            sign4XY = new Point2D(300,500);
+            root.getChildren().add(sign4);
+            root.getChildren().add(sign4HitBox);
             boolean putExtinguisher = true;
             for(int i = 0; i<inventory.size(); i++){
                 if(inventory.get(i).getItemName().equals("Supreme Extinguisher")){
@@ -945,9 +956,17 @@ public class Runner extends Application {
         if(currentScene==2){
             sign5.setRotate(180);
             sign5.setLayoutX(50);
+            double temp = sign5XY.getY();
+            sign5XY = new Point2D(50,temp);
             sign5HitBox.setLayoutX(50);
             root.getChildren().add(sign5);
             root.getChildren().add(sign5HitBox);
+            sign3.setLayoutY(500);
+            sign3.setRotate(0);
+            sign3.setLayoutX(300);
+            sign3XY = new Point2D(300,500);
+            root.getChildren().add(sign3);
+            root.getChildren().add(sign3HitBox);
             if(!containsBackpack){
                 root.getChildren().add(backpack);
                 root.getChildren().add(backpackHitbox);
@@ -992,10 +1011,8 @@ public class Runner extends Application {
             }
         }
         if(currentScene==5){
-            if(!landLord){
-                root.getChildren().add(crib);
-                root.getChildren().add(cribHitbox);
-            }
+            root.getChildren().add(crib);
+            root.getChildren().add(cribHitbox);
             boolean putWeapon = true;
             for(int i = 0; i<inventory.size(); i++){
                 if(inventory.get(i).getItemName().equals("Ninja\'s Weapon")){
@@ -1008,7 +1025,7 @@ public class Runner extends Application {
                 root.getChildren().add(ninjaWeaponHitbox);
             }
         }
-        if(brickScene()){
+        if(brickScene()&&brickCount!=4){
             root.getChildren().add(brick);
             root.getChildren().add(brickHitbox);
         }
@@ -2178,7 +2195,7 @@ public class Runner extends Application {
                 }
                 break;
             case "NinjaFinale":
-                System.out.println(buisnessOwner);
+                System.out.println(buisnessOwner+", "+landLord+", "+(moneyCount>=10000));
                 if(landLord){
                     q.completeReqAtPos(0);
                 }else if(moneyCount>=10000){
@@ -2199,7 +2216,13 @@ public class Runner extends Application {
                         }
                     }
                 }
+                if(moneyCount>=10000&landLord&&buisnessOwner){
+                    end = true;
+                    root.getChildren().clear();
+                    root.getChildren().add(endScreen);
+                }
                 if(q.questComplete()){
+                    end = true;
                     root.getChildren().clear();
                     root.getChildren().add(endScreen);
                 }
@@ -2218,11 +2241,14 @@ public class Runner extends Application {
                 }
                 break;
             case "FriendlyQuest":
+                boolean test1 = false, test2 = false;
                 for(int i = 0; i<inventory.size(); i++){
                     if(inventory.get(i).getItemName().equals("Rolex")){
+                        test1 = true;
                         q.completeReqAtPos(0);
                     }
                     if(inventory.get(i).getItemName().equals("Clout Goggles")){
+                        test2 = true;
                         q.completeReqAtPos(1);
                     }
                 }
@@ -2243,7 +2269,13 @@ public class Runner extends Application {
                         }
                     }
                 }
+                if(landLord&&test1&&test2){
+                    end = true;
+                    root.getChildren().clear();
+                    root.getChildren().add(endScreen);
+                }
                 if(q.questComplete()){
+                    end = true;
                     root.getChildren().clear();
                     root.getChildren().add(endScreen);
                 }

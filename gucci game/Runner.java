@@ -821,7 +821,6 @@ public class Runner extends Application {
         root.getChildren().clear();
         root.requestFocus();
 
-
         if(currentScene==1){
             if(previousScene==2&&!alreadyInScene){
                 player.setLayoutX(820);
@@ -1727,9 +1726,6 @@ public class Runner extends Application {
         miniPane.getChildren().add(cb1);
         miniPane.getChildren().add(l1);
 
-        /* cssify button
-        remove boarders
-        remove background */
         Button exit = new Button();
         ImageView resource = new ImageView("resources/Objects/redX.png");
         resource.setFitWidth(25);

@@ -1,0 +1,282 @@
+import javafx.animation.AnimationTimer;
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Slider;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.stage.Stage;
+import javafx.util.Duration;
+
+import java.awt.*;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class Main extends Application implements MusicPlayer{
+    private HashMap<Media, Boolean> musicList;
+    private MusicBar mb;
+    private Pane root;
+    private Dimension screen;
+    private Text currentSongText;
+    private Text nextSongText;
+    private Text previousSongText;
+    private MediaPlayer mp;
+    private Rectangle musicBar;
+    private Duration timeHolder;
+    private int currentSongIndex;
+    private double currentSongTime;
+    private double totalSongTime;
+    private Button previousButton;
+    private Button skipButton;
+    private Button playButton;
+    private Button infoButton;
+    private Slider volumeSlider;
+    private String styleSheet = Paths.get("musicPlayer/resources/Stylesheet.css").toUri().toString();
+    private boolean musicStoped = true;
+    private boolean activeSong;
+    public Main(){
+        mb = new MusicBar();
+        musicBar = new Rectangle();
+        root = new Pane();
+        musicList = new HashMap<>();
+        previousSongText = new Text();
+        nextSongText = new Text();
+        try(Stream<Path> paths = Files.walk(Paths.get("musicPlayer/music/"))) {
+            List<Path> pathContainer = paths.filter(Files::isRegularFile).collect(Collectors.toList());
+            for(Path path : pathContainer){
+                if(path.toString().contains(".mp3")) {
+                    musicList.put(new Media(Paths.get(path.toString()).toUri().toString()), false);
+                }
+            }
+        } catch (IOException e) { e.printStackTrace(); }
+        screen = Toolkit.getDefaultToolkit().getScreenSize();
+    }
+    public static void main(String[] args) {
+        launch(args);
+    }
+    private void timer(){
+        new AnimationTimer(){
+            public void handle(long now) {
+                if(activeSong){
+                    root.getChildren().remove(musicBar);
+                    if(!(mp.getStatus()==null)){
+                        if(mp.getStatus()==MediaPlayer.Status.STOPPED){
+                            currentSongTime = timeHolder.toSeconds();
+                        }else{
+                            currentSongTime = mp.getCurrentTime().toSeconds();
+                        }
+                    }
+                    musicBar = mb.drawMusicBar((currentSongTime/totalSongTime)*700);
+                    root.getChildren().add(musicBar);
+                    currentSongText.toFront();
+                }else{
+                    root.getChildren().remove(musicBar);
+                    root.getChildren().remove(currentSongText);
+                }
+            }
+        }.start();
+    }
+    public void start(Stage primaryStage) throws Exception {
+        playButton = PlayButton.drawButton(100,100);
+        ImageView iv = PlayButton.getImage();
+        iv.setFitWidth(50);
+        iv.setFitHeight(50);
+        playButton.setOnAction(event -> {
+            if(musicStoped){
+                iv.setImage(new Image(Paths.get("musicPlayer/resources/pauseButton.png").toUri().toString()));
+                playButton.setGraphic(iv);
+                musicStoped = false;
+                printInfo("playing");
+                play();
+                activeSong = true;
+            }else{
+                iv.setImage(new Image(Paths.get("musicPlayer/resources/playButton.png").toUri().toString()));
+                playButton.setGraphic(iv);
+                musicStoped = true;
+                printInfo("stopped");
+                stopSong();
+            }
+        });
+        root.getChildren().add(playButton);
+
+        skipButton = SkipButton.drawButton();
+        skipButton.toFront();
+        skipButton.setOnAction(event -> {
+            skipSong();
+            activeSong = true;
+            iv.setImage(new Image(Paths.get("musicPlayer/resources/pauseButton.png").toUri().toString()));
+            printInfo("skipped");
+        });
+        root.getChildren().add(skipButton);
+
+        previousButton = PreviousButton.drawButton();
+        previousButton.toFront();
+        previousButton.setOnAction(event -> {
+            if(currentSongIndex-1>=0) {
+                previousSong();
+                activeSong = true;
+                iv.setImage(new Image(Paths.get("musicPlayer/resources/pauseButton.png").toUri().toString()));
+                printInfo("previous");
+            }else{
+                System.out.println("no previous songs");
+            }
+        });
+        root.getChildren().add(previousButton);
+
+        infoButton = InfoButton.drawButton(700,50);
+        infoButton.toFront();
+        root.getChildren().add(infoButton);
+
+        root.getChildren().add(mb.drawPlaceHolder());
+
+        volumeSlider = VolumeSlider.drawSlider(250,100);
+        volumeSlider.toFront();
+        volumeSlider.valueProperty().addListener((observable, oldValue, newValue) ->{
+            if(mp != null){
+                setVolume(newValue.doubleValue());
+            }
+        });
+        root.getChildren().add(volumeSlider);
+
+        primaryStage.setScene(new Scene(root,800,600));
+        primaryStage.setTitle("Music Player");
+        primaryStage.show();
+        primaryStage.getIcons().add(new Image(Paths.get("musicPlayer/resources/playIcon.png").toUri().toString()));
+        timer();
+        currentSongText = SongText.drawText(MusicBar.getX()+15, MusicBar.getY()+5);
+        currentSongText.setText("No Active Song");
+        drawPreviousSong();
+        drawNextSong();
+    }
+    private List<Media> getMedia(){
+        return new ArrayList<>(musicList.keySet());
+    }
+    public void play(){
+        if(activeSong){
+            mp.setStartTime(timeHolder);
+        }else {
+            mp = new MediaPlayer(getMedia().get(currentSongIndex));
+            drawPreviousSong();
+            drawNextSong();
+            mp.setVolume(volumeSlider.getValue());
+            currentSongText.setText(getMusicName(getMedia().get(currentSongIndex).getSource()));
+            root.getChildren().remove(currentSongText);
+            root.getChildren().add(currentSongText);
+            totalSongTime = mp.getTotalDuration().toSeconds();
+            mp.setOnReady(()-> totalSongTime = mp.getTotalDuration().toSeconds());
+            mp.setOnEndOfMedia(()->{
+                mp.dispose();
+                currentSongIndex++;
+                activeSong = false;
+                System.out.println("musicFinished");
+                System.out.println(getMedia().size()+", "+currentSongIndex+", "+currentSongTime+"s");
+                if(!(currentSongIndex>musicList.size())) {
+                    mb = new MusicBar();
+                    play();
+                }
+                activeSong = true;
+            });
+        }
+        mp.play();
+        printInfo("Current time: "+mp.getCurrentTime().toString());
+    }
+    public void stopSong(){
+        timeHolder = mp.getCurrentTime();
+        System.out.println("Stopped at: "+timeHolder.toString());
+        mp.stop();
+    }
+    public void skipSong() {
+        currentSongIndex++;
+        mb = new MusicBar();
+        printInfo(getMedia().get(currentSongIndex).getSource());
+        stopSong();
+        dispose();
+        activeSong = false;
+        timeHolder = null;
+        play();
+    }
+    public void previousSong() {
+        currentSongIndex--;
+        mb = new MusicBar();
+        printInfo(getMedia().get(currentSongIndex).getSource());
+        stopSong();
+        dispose();
+        activeSong = false;
+        timeHolder = null;
+        play();
+    }
+    public void shuffleList() {
+
+    }
+    public void dispose(){
+        mp.dispose();
+    }
+    public void setVolume(double volume){
+        mp.setVolume(volume);
+    }
+    private void drawPreviousSong(){
+        root.getChildren().remove(previousSongText);
+        if(currentSongIndex-1>=0) {
+            previousSongText.setText(getMusicName(getMedia().get(currentSongIndex - 1).getSource()));
+        }
+        else{
+            previousSongText.setText("No Previous Songs");
+        }
+        previousSongText.setFont(new Font(20));
+        previousSongText.setLayoutY(MusicBar.getY()-30);
+        previousSongText.setLayoutX(MusicBar.getX()+15);
+        root.getChildren().add(previousSongText);
+    }
+    private void drawNextSong(){
+        root.getChildren().remove(nextSongText);
+        if(currentSongIndex+1<getMedia().size()) {
+            if(currentSongIndex!=0) {
+                nextSongText.setText(getMusicName(getMedia().get(currentSongIndex + 1).getSource()));
+            }else{
+                nextSongText.setText(getMusicName(getMedia().get(currentSongIndex).getSource()));
+            }
+        }
+        else{
+            nextSongText.setText("No Future Songs");
+        }
+        nextSongText.setFont(new Font(20));
+        nextSongText.setLayoutY(MusicBar.getY()+70+nextSongText.getFont().getSize());
+        nextSongText.setLayoutX(MusicBar.getX()+15);
+        root.getChildren().add(nextSongText);
+    }
+    private String getMusicName(String name){
+        name = name.substring(name.lastIndexOf('/')+1,name.lastIndexOf('.'));
+        StringBuilder stringifiedName = new StringBuilder();
+        for(int i = 0; i<name.length(); i++){
+            if(name.charAt(i)=='%'&&name.charAt(i+1)=='2'&&name.charAt(i+2)=='0'){
+                stringifiedName.append(' ');
+                i+=2;
+            }else{
+                stringifiedName.append(name.charAt(i));
+            }
+        }
+        return stringifiedName.toString();
+    }
+    private static void printInfo(String s){
+        System.out.println(s);
+    }
+    private static void printInfo(int s){
+        System.out.println(s);
+    }
+    private static void printInfo(double s){
+        System.out.println(s);
+    }
+}

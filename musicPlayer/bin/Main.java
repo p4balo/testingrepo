@@ -1,8 +1,10 @@
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
+import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
@@ -29,6 +31,7 @@ public class Main extends Application implements MusicPlayer{
     private HashMap<Media, Boolean> musicList;
     private MusicBar mb;
     private Pane root;
+    private Pane infoPane;
     private Dimension screen;
     private Text currentSongText;
     private Text nextSongText;
@@ -48,6 +51,7 @@ public class Main extends Application implements MusicPlayer{
     private boolean musicStoped = true;
     private boolean activeSong;
     public Main(){
+        infoPane = InfoScreen.drawInfoScreen(100,25);
         mb = new MusicBar();
         musicBar = new Rectangle();
         root = new Pane();
@@ -85,6 +89,9 @@ public class Main extends Application implements MusicPlayer{
                 }else{
                     root.getChildren().remove(musicBar);
                     root.getChildren().remove(currentSongText);
+                }
+                if(nextSongText.getText().equals(currentSongText.getText())){
+                    drawNextSong(true);
                 }
             }
         }.start();
@@ -138,6 +145,27 @@ public class Main extends Application implements MusicPlayer{
 
         infoButton = InfoButton.drawButton(700,50);
         infoButton.toFront();
+        infoButton.setOnAction(event ->{
+            if(activeSong) {
+                stopSong();
+            }
+            for(int i = 0; i<root.getChildren().size(); i++){
+                Node n = root.getChildren().get(i);
+                n.setEffect(new GaussianBlur());
+            }
+            root.getChildren().add(infoPane);
+            Button b = InfoScreen.drawBackButton(300,25);
+            b.getStylesheets().add(styleSheet);
+            b.setOnAction(event1 -> {
+                root.getChildren().remove(b);
+                root.getChildren().remove(infoPane);
+                for(int i = 0; i<root.getChildren().size(); i++){
+                    Node n = root.getChildren().get(i);
+                    n.setEffect(null);
+                }
+            });
+            root.getChildren().add(b);
+        });
         root.getChildren().add(infoButton);
 
         root.getChildren().add(mb.drawPlaceHolder());
@@ -159,7 +187,7 @@ public class Main extends Application implements MusicPlayer{
         currentSongText = SongText.drawText(MusicBar.getX()+15, MusicBar.getY()+5);
         currentSongText.setText("No Active Song");
         drawPreviousSong();
-        drawNextSong();
+        drawNextSong(false);
     }
     private List<Media> getMedia(){
         return new ArrayList<>(musicList.keySet());
@@ -170,7 +198,7 @@ public class Main extends Application implements MusicPlayer{
         }else {
             mp = new MediaPlayer(getMedia().get(currentSongIndex));
             drawPreviousSong();
-            drawNextSong();
+            drawNextSong(false);
             mp.setVolume(volumeSlider.getValue());
             currentSongText.setText(getMusicName(getMedia().get(currentSongIndex).getSource()));
             root.getChildren().remove(currentSongText);
@@ -179,7 +207,6 @@ public class Main extends Application implements MusicPlayer{
             mp.setOnReady(()-> totalSongTime = mp.getTotalDuration().toSeconds());
             mp.setOnEndOfMedia(()->{
                 mp.dispose();
-                currentSongIndex++;
                 activeSong = false;
                 System.out.println("musicFinished");
                 System.out.println(getMedia().size()+", "+currentSongIndex+", "+currentSongTime+"s");
@@ -240,10 +267,12 @@ public class Main extends Application implements MusicPlayer{
         previousSongText.setLayoutX(MusicBar.getX()+15);
         root.getChildren().add(previousSongText);
     }
-    private void drawNextSong(){
+    private void drawNextSong(boolean force){
         root.getChildren().remove(nextSongText);
         if(currentSongIndex+1<getMedia().size()) {
-            if(currentSongIndex!=0) {
+            if(force){
+                nextSongText.setText(getMusicName(getMedia().get(currentSongIndex + 1).getSource()));
+            } else if(currentSongIndex!=0) {
                 nextSongText.setText(getMusicName(getMedia().get(currentSongIndex + 1).getSource()));
             }else{
                 nextSongText.setText(getMusicName(getMedia().get(currentSongIndex).getSource()));
@@ -278,5 +307,8 @@ public class Main extends Application implements MusicPlayer{
     }
     private static void printInfo(double s){
         System.out.println(s);
+    }
+    static String getPathname(){
+        return Paths.get("musicPlayer/music/").toAbsolutePath().toString();
     }
 }

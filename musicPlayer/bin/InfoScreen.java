@@ -19,7 +19,7 @@ class InfoScreen {
         miniPane.setLayoutY(y);
         miniPane.setId("InfoPane");
 
-        Rectangle background = new Rectangle(0,0,250,350);
+        Rectangle background = new Rectangle(0,0,250,250);
         background.setFill(Color.WHITE);
         background.setStroke(Color.BLACK);
         background.setStrokeWidth(3);
@@ -54,8 +54,9 @@ class InfoScreen {
         System.out.println(Main.getPathname());
         pathText.setLayoutX(50);
         pathText.setLayoutY(100);
-        pathText.setFont(new Font(16));
-        pathText.setMaxWidth(190);
+        pathText.setFont(new Font(12));
+        pathText.setMinWidth(190);
+        pathText.setMaxHeight(15);
         Label l2 = new Label("Path");
         l2.setLayoutY(100);
         l2.setLayoutX(15);
@@ -72,7 +73,7 @@ class InfoScreen {
         iv.setFitWidth(25);
         back.setGraphic(iv);
         back.setLayoutY(y);
-        back.setLayoutX(x);
+        back.setLayoutX(x+10);
         return back;
     }
 }

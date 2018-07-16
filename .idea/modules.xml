@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/PasswordGen/PasswordGen.iml" filepath="$PROJECT_DIR$/PasswordGen/PasswordGen.iml" />
-      <module fileurl="file://$PROJECT_DIR$/broken files/broken files.iml" filepath="$PROJECT_DIR$/broken files/broken files.iml" />
       <module fileurl="file://$PROJECT_DIR$/gucci game/gucci game.iml" filepath="$PROJECT_DIR$/gucci game/gucci game.iml" />
       <module fileurl="file://$PROJECT_DIR$/musicPlayer/musicPlayer.iml" filepath="$PROJECT_DIR$/musicPlayer/musicPlayer.iml" />
       <module fileurl="file://$PROJECT_DIR$/testingrepository.iml" filepath="$PROJECT_DIR$/testingrepository.iml" />

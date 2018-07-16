@@ -17,7 +17,7 @@ class SkipButton {
         skipButton.getStylesheets().add(styleSheet);
         skipButton.setId("SkipButton");
         skipButton.setLayoutX(150);
-        skipButton.setLayoutY(100);
+        skipButton.setLayoutY(200);
         skipButton.setTranslateZ(skipButton.getBoundsInLocal().getWidth()/2);
         skipButton.setRotationAxis(Rotate.Y_AXIS);
         skipButton.setRotate(180);

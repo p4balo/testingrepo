@@ -21,7 +21,7 @@ class MusicBar {
     Rectangle drawPlaceHolder(){
         Rectangle placeHolder = new Rectangle();
         placeHolder.setLayoutX(50);
-        placeHolder.setLayoutY(270);
+        placeHolder.setLayoutY(100);
         placeHolder.setWidth(700);
         placeHolder.setHeight(50);
         placeHolder.setStroke(Color.BLACK);
@@ -32,7 +32,7 @@ class MusicBar {
     Rectangle drawMusicBar(double width){
         Rectangle musicBar = new Rectangle();
         musicBar.setLayoutX(50);
-        musicBar.setLayoutY(270);
+        musicBar.setLayoutY(100);
         musicBar.setWidth(width);
         musicBar.setHeight(50);
         musicBar.setFill(col);
@@ -42,6 +42,6 @@ class MusicBar {
         return 50;
     }
     static double getY(){
-        return 270;
+        return 100;
     }
 }

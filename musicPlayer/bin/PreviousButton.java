@@ -17,7 +17,7 @@ class PreviousButton {
         previousButton.getStylesheets().add(styleSheet);
         previousButton.setId("SkipButton");
         previousButton.setLayoutX(50);
-        previousButton.setLayoutY(100);
+        previousButton.setLayoutY(200);
         previousButton.setTranslateZ(previousButton.getBoundsInLocal().getWidth()/2);
         previousButton.setRotationAxis(Rotate.Y_AXIS);
         previousButton.setRotate(0);

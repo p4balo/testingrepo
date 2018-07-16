@@ -9,6 +9,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.media.Media;
+import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
@@ -51,7 +52,7 @@ public class Main extends Application implements MusicPlayer{
     private boolean musicStoped = true;
     private boolean activeSong;
     public Main(){
-        infoPane = InfoScreen.drawInfoScreen(100,25);
+        infoPane = InfoScreen.drawInfoScreen(175,25);
         mb = new MusicBar();
         musicBar = new Rectangle();
         root = new Pane();
@@ -97,7 +98,7 @@ public class Main extends Application implements MusicPlayer{
         }.start();
     }
     public void start(Stage primaryStage) throws Exception {
-        playButton = PlayButton.drawButton(100,100);
+        playButton = PlayButton.drawButton(100,200);
         ImageView iv = PlayButton.getImage();
         iv.setFitWidth(50);
         iv.setFitHeight(50);
@@ -143,7 +144,7 @@ public class Main extends Application implements MusicPlayer{
         });
         root.getChildren().add(previousButton);
 
-        infoButton = InfoButton.drawButton(700,50);
+        infoButton = InfoButton.drawButton(755,5);
         infoButton.toFront();
         infoButton.setOnAction(event ->{
             if(activeSong) {
@@ -154,7 +155,7 @@ public class Main extends Application implements MusicPlayer{
                 n.setEffect(new GaussianBlur());
             }
             root.getChildren().add(infoPane);
-            Button b = InfoScreen.drawBackButton(300,25);
+            Button b = InfoScreen.drawBackButton(375,25);
             b.getStylesheets().add(styleSheet);
             b.setOnAction(event1 -> {
                 root.getChildren().remove(b);
@@ -170,7 +171,7 @@ public class Main extends Application implements MusicPlayer{
 
         root.getChildren().add(mb.drawPlaceHolder());
 
-        volumeSlider = VolumeSlider.drawSlider(250,100);
+        volumeSlider = VolumeSlider.drawSlider(250,225);
         volumeSlider.toFront();
         volumeSlider.valueProperty().addListener((observable, oldValue, newValue) ->{
             if(mp != null){
@@ -179,12 +180,12 @@ public class Main extends Application implements MusicPlayer{
         });
         root.getChildren().add(volumeSlider);
 
-        primaryStage.setScene(new Scene(root,800,600));
+        primaryStage.setScene(new Scene(root,800,350));
         primaryStage.setTitle("Music Player");
         primaryStage.show();
         primaryStage.getIcons().add(new Image(Paths.get("musicPlayer/resources/playIcon.png").toUri().toString()));
         timer();
-        currentSongText = SongText.drawText(MusicBar.getX()+15, MusicBar.getY()+5);
+        currentSongText = SongText.drawText(MusicBar.getX()+15, MusicBar.getY()+7);
         currentSongText.setText("No Active Song");
         drawPreviousSong();
         drawNextSong(false);
@@ -212,7 +213,7 @@ public class Main extends Application implements MusicPlayer{
                 System.out.println(getMedia().size()+", "+currentSongIndex+", "+currentSongTime+"s");
                 if(!(currentSongIndex>musicList.size())) {
                     mb = new MusicBar();
-                    play();
+                    skipSong();
                 }
                 activeSong = true;
             });

@@ -10,8 +10,8 @@ class InfoButton{
     static Button drawButton(double x, double y){
         String styleSheet = Paths.get("musicPlayer/resources/Stylesheet.css").toUri().toString();
         ImageView iv = new ImageView(Paths.get("musicPlayer/resources/infoButton.png").toUri().toString());
-        iv.setFitHeight(45);
-        iv.setFitWidth(45);
+        iv.setFitHeight(30);
+        iv.setFitWidth(30);
         playButton.setGraphic(iv);
         playButton.getStylesheets().add(styleSheet);
         playButton.setId("InfoButton");

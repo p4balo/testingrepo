@@ -64,6 +64,27 @@ class InfoScreen {
         miniPane.getChildren().add(l2);
         miniPane.getChildren().add(pathText);
 
+        Button b1 = new Button();
+        if(!Main.songInfo){
+            b1.setText("Display List of Songs");
+        }else{
+            b1.setText("Hide List Of Songs");
+        }
+        b1.setLayoutX(15);
+        b1.setLayoutY(50);
+        b1.setOnAction(event -> {
+            if(!Main.songInfo){
+                b1.setText("Hide List Of Songs");
+                Main.songInfo = true;
+            }else{
+                b1.setText("Display List of Songs");
+                Main.songInfo = true;
+            }
+            System.out.println(Main.songInfo);
+
+        });
+        miniPane.getChildren().add(b1);
+
         return miniPane;
     }
     static Button drawBackButton(double x, double y){

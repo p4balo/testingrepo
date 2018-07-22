@@ -4,6 +4,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
+import javafx.scene.control.TextField;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -17,7 +18,8 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -51,6 +53,7 @@ public class Main extends Application implements MusicPlayer{
     private String styleSheet = Paths.get("musicPlayer/resources/Stylesheet.css").toUri().toString();
     private boolean musicStoped = true;
     private boolean activeSong;
+    public static boolean songInfo;
     public Main(){
         infoPane = InfoScreen.drawInfoScreen(175,25);
         mb = new MusicBar();
@@ -165,6 +168,11 @@ public class Main extends Application implements MusicPlayer{
                     n.setEffect(null);
                 }
             });
+            System.out.println("test");
+            if(songInfo){
+                TextField tf = drawSongInfo();
+                root.getChildren().add(tf);
+            }
             root.getChildren().add(b);
         });
         root.getChildren().add(infoButton);
@@ -299,6 +307,22 @@ public class Main extends Application implements MusicPlayer{
             }
         }
         return stringifiedName.toString();
+    }
+    private TextField drawSongInfo(){
+        javafx.scene.control.TextField tf = new TextField();
+        StringBuilder s = new StringBuilder();
+        for(int i = 0; i<getMedia().size(); i++){
+            s.append(getMedia().get(i));
+            s.append("\n");
+        }
+        tf.setText(s.toString());
+        tf.setFont(new Font(14));
+        tf.setEditable(false);
+        tf.setLayoutX(500);
+        tf.setLayoutY(200);
+        tf.setMaxSize(200,350);
+        System.out.println("test");
+        return tf;
     }
     private static void printInfo(String s){
         System.out.println(s);

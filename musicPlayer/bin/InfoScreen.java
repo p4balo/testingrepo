@@ -71,14 +71,14 @@ class InfoScreen {
             b1.setText("Hide List Of Songs");
         }
         b1.setLayoutX(15);
-        b1.setLayoutY(50);
+        b1.setLayoutY(140);
         b1.setOnAction(event -> {
             if(!Main.songInfo){
                 b1.setText("Hide List Of Songs");
                 Main.songInfo = true;
             }else{
                 b1.setText("Display List of Songs");
-                Main.songInfo = true;
+                Main.songInfo = false;
             }
             System.out.println(Main.songInfo);
 

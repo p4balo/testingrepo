@@ -2,9 +2,7 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -53,6 +51,7 @@ public class Main extends Application implements MusicPlayer{
     private String styleSheet = Paths.get("musicPlayer/resources/Stylesheet.css").toUri().toString();
     private boolean musicStoped = true;
     private boolean activeSong;
+    private boolean infoDrawn;
     public static boolean songInfo;
     public Main(){
         infoPane = InfoScreen.drawInfoScreen(175,25);
@@ -150,30 +149,44 @@ public class Main extends Application implements MusicPlayer{
         infoButton = InfoButton.drawButton(755,5);
         infoButton.toFront();
         infoButton.setOnAction(event ->{
-            if(activeSong) {
-                stopSong();
-            }
-            for(int i = 0; i<root.getChildren().size(); i++){
-                Node n = root.getChildren().get(i);
-                n.setEffect(new GaussianBlur());
-            }
-            root.getChildren().add(infoPane);
-            Button b = InfoScreen.drawBackButton(375,25);
-            b.getStylesheets().add(styleSheet);
-            b.setOnAction(event1 -> {
-                root.getChildren().remove(b);
-                root.getChildren().remove(infoPane);
-                for(int i = 0; i<root.getChildren().size(); i++){
-                    Node n = root.getChildren().get(i);
-                    n.setEffect(null);
+            if(!infoDrawn) {
+                if (activeSong) {
+                    stopSong();
                 }
-            });
-            System.out.println("test");
-            if(songInfo){
-                TextField tf = drawSongInfo();
-                root.getChildren().add(tf);
+                for (int i = 0; i < root.getChildren().size(); i++) {
+                    Node n = root.getChildren().get(i);
+                    n.setEffect(new GaussianBlur());
+                }
+                root.getChildren().add(infoPane);
+                Button b = InfoScreen.drawBackButton(375, 25);
+                b.getStylesheets().add(styleSheet);
+                b.setOnAction(event1 -> {
+                    root.getChildren().remove(b);
+                    root.getChildren().remove(infoPane);
+                    for (int i = 0; i < root.getChildren().size(); i++) {
+                        Node n = root.getChildren().get(i);
+                        n.setEffect(null);
+                    }
+                    System.out.println(songInfo);
+                    if (songInfo) {
+                        TextArea ta = drawSongInfo();
+                        ta.setId("songInfo");
+                        root.getChildren().add(ta);
+                    }
+                    if(!songInfo){
+                        for(int i = 0; i<root.getChildren().size(); i++){
+                            if(root.getChildren().get(i).getId()!=null){
+                                if(root.getChildren().get(i).getId().equals("songInfo")){
+                                    root.getChildren().remove(i);
+                                }
+                            }
+                        }
+                    }
+                    infoDrawn = false;
+                });
+                root.getChildren().add(b);
+                infoDrawn = true;
             }
-            root.getChildren().add(b);
         });
         root.getChildren().add(infoButton);
 
@@ -308,21 +321,23 @@ public class Main extends Application implements MusicPlayer{
         }
         return stringifiedName.toString();
     }
-    private TextField drawSongInfo(){
-        javafx.scene.control.TextField tf = new TextField();
+    private TextArea drawSongInfo(){
+        TextArea ta = new TextArea();
         StringBuilder s = new StringBuilder();
-        for(int i = 0; i<getMedia().size(); i++){
-            s.append(getMedia().get(i));
-            s.append("\n");
+        for(int i = 0; i<getMedia().size(); i++) {
+            s.append(getMusicName(getMedia().get(i).getSource()));
+            if(getMedia().size()-1!=i) {
+                s.append('\n');
+            }
         }
-        tf.setText(s.toString());
-        tf.setFont(new Font(14));
-        tf.setEditable(false);
-        tf.setLayoutX(500);
-        tf.setLayoutY(200);
-        tf.setMaxSize(200,350);
+        ta.setText(s.toString());
+        ta.setFont(new Font(12));
+        ta.setEditable(false);
+        ta.setLayoutX(430);
+        ta.setLayoutY(200);
+        ta.setMaxSize(325,140);
         System.out.println("test");
-        return tf;
+        return ta;
     }
     private static void printInfo(String s){
         System.out.println(s);

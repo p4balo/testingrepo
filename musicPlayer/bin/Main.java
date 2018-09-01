@@ -1,5 +1,6 @@
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -152,6 +153,10 @@ public class Main extends Application implements MusicPlayer{
             if(!infoDrawn) {
                 if (activeSong) {
                     stopSong();
+                    musicStoped = true;
+                    iv.setImage(new Image(Paths.get("musicPlayer/resources/playButton.png").toUri().toString()));
+                    playButton.setGraphic(iv);
+                    printInfo("stopped");
                 }
                 for (int i = 0; i < root.getChildren().size(); i++) {
                     Node n = root.getChildren().get(i);
@@ -167,11 +172,12 @@ public class Main extends Application implements MusicPlayer{
                         Node n = root.getChildren().get(i);
                         n.setEffect(null);
                     }
-                    System.out.println(songInfo);
+                    System.out.println("Displaying Song Information: "+songInfo);
                     if (songInfo) {
                         TextArea ta = drawSongInfo();
                         ta.setId("songInfo");
                         root.getChildren().add(ta);
+                        System.out.println("Current Song Index: "+currentSongIndex);
                     }
                     if(!songInfo){
                         for(int i = 0; i<root.getChildren().size(); i++){
@@ -231,7 +237,7 @@ public class Main extends Application implements MusicPlayer{
                 mp.dispose();
                 activeSong = false;
                 System.out.println("musicFinished");
-                System.out.println(getMedia().size()+", "+currentSongIndex+", "+currentSongTime+"s");
+                System.out.println("List Size"+getMedia().size()+", Current Song"+currentSongIndex+", Amount of Time"+currentSongTime+"s");
                 if(!(currentSongIndex>musicList.size())) {
                     mb = new MusicBar();
                     skipSong();
@@ -250,7 +256,7 @@ public class Main extends Application implements MusicPlayer{
     public void skipSong() {
         currentSongIndex++;
         mb = new MusicBar();
-        printInfo(getMedia().get(currentSongIndex).getSource());
+        printInfo("File Location"+getMedia().get(currentSongIndex).getSource());
         stopSong();
         dispose();
         activeSong = false;
@@ -260,7 +266,7 @@ public class Main extends Application implements MusicPlayer{
     public void previousSong() {
         currentSongIndex--;
         mb = new MusicBar();
-        printInfo(getMedia().get(currentSongIndex).getSource());
+        printInfo("File Location"+getMedia().get(currentSongIndex).getSource());
         stopSong();
         dispose();
         activeSong = false;
@@ -321,6 +327,18 @@ public class Main extends Application implements MusicPlayer{
         }
         return stringifiedName.toString();
     }
+    private Node nodeItterator(String id){
+        Node n = null;
+        for(int i = 0; i<root.getChildren().size(); i++){
+            if(root.getChildren().get(i).getId()!=null){
+                if(root.getChildren().get(i).getId().equals(id)){
+                    n = root.getChildren().get(i);
+                    break;
+                }
+            }
+        }
+        return n;
+    }
     private TextArea drawSongInfo(){
         TextArea ta = new TextArea();
         StringBuilder s = new StringBuilder();
@@ -336,7 +354,9 @@ public class Main extends Application implements MusicPlayer{
         ta.setLayoutX(430);
         ta.setLayoutY(200);
         ta.setMaxSize(325,140);
-        System.out.println("test");
+        ta.setId("Test");
+        ta.getStylesheets().add(styleSheet);
+        Platform.runLater(() -> ta.selectRange(13, 18));
         return ta;
     }
     private static void printInfo(String s){

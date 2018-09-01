@@ -1,4 +1,3 @@
-import com.sun.istack.internal.NotNull;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;

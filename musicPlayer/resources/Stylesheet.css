@@ -19,14 +19,17 @@
     -fx-background-color: transparent;
     -fx-opacity: 1;
 }
-#Test{
-    -fx-highlight-fill: yellow;
-}
-.button {
-    -fx-border-color: transparent;
-    -fx-background-color: transparent;
+#InfoButton:hover {
     -fx-opacity: 0.7;
 }
-.button:hover{
+#VolumeButton {
+    -fx-border-color: transparent;
+    -fx-background-color: transparent;
     -fx-opacity: 1;
+}
+#VolumeButton:hover {
+    -fx-opacity: 0.7;
+}
+#Test{
+    -fx-highlight-fill: yellow;
 }

@@ -9,7 +9,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.media.Media;
-import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
@@ -44,10 +43,13 @@ public class Main extends Application implements MusicPlayer{
     private int currentSongIndex;
     private double currentSongTime;
     private double totalSongTime;
+    private double currentVolume;
+    private double previousVolume;
     private Button previousButton;
     private Button skipButton;
     private Button playButton;
     private Button infoButton;
+    private Button volumeButton;
     private Slider volumeSlider;
     private String styleSheet = Paths.get("musicPlayer/resources/Stylesheet.css").toUri().toString();
     private boolean musicStoped = true;
@@ -198,14 +200,42 @@ public class Main extends Application implements MusicPlayer{
 
         root.getChildren().add(mb.drawPlaceHolder());
 
-        volumeSlider = VolumeSlider.drawSlider(250,225);
+        volumeButton = VolumeButton.drawButton(220,205,.5);
+        volumeButton.toFront();
+        root.getChildren().add(volumeButton);
+
+        volumeSlider = VolumeSlider.drawSlider(270,225);
         volumeSlider.toFront();
+        currentVolume = 0.5;
         volumeSlider.valueProperty().addListener((observable, oldValue, newValue) ->{
             if(mp != null){
+                root.getChildren().remove(volumeButton);
                 setVolume(newValue.doubleValue());
+                currentVolume = newValue.doubleValue();
+                volumeButton = VolumeButton.drawButton(220,205, newValue.doubleValue());
+                root.getChildren().add(volumeButton);
             }
         });
         root.getChildren().add(volumeSlider);
+
+        volumeButton.setOnAction(event -> {
+            if(currentVolume>0){
+                previousVolume = volumeSlider.getValue();
+                root.getChildren().remove(volumeSlider);
+                volumeSlider.setValue(0);
+                volumeButton = VolumeButton.drawButton(220,205, 0.0);
+                setVolume(0.0);
+                currentVolume = 0;
+                root.getChildren().add(volumeSlider);
+            }else{
+                root.getChildren().remove(volumeSlider);
+                volumeSlider.setValue(previousVolume);
+                volumeButton = VolumeButton.drawButton(220, 205, volumeSlider.getValue());
+                setVolume(volumeSlider.getValue());
+                currentVolume = volumeSlider.getValue();
+                root.getChildren().add(volumeSlider);
+            }
+        });
 
         primaryStage.setScene(new Scene(root,800,350));
         primaryStage.setTitle("Music Player");
